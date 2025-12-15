@@ -1,38 +1,32 @@
-# Turborepo starter
+# Lukyss Bar
 
-This Turborepo starter is maintained by the Turborepo core team.
+Il s'agit d'un projet comprenant un site web, une Api et une application mobile.   
+Le bu de ce projet est de permettre à un administrateur d'afficher les cocktails qu'ils peut réaliser pour ses convives en fonction de son stock d'ingrédients.   
+Les utilisateur prennent des commandes sur l'application web, l'administrateur les reçoit sur une application mobile et peut ainsi gérer les commandes.   
+Ce Monorepo a été créé avec [TurboRepo](https://turborepo.com/).
 
-## Using this example
+## Maquettes
 
-Run the following command:
+### Site Web
+### Application Mobile
 
-```sh
-npx create-turbo@latest
-```
+## Apps and Packages
 
-## What's inside?
+- `web`: une app [Next.js](https://nextjs.org/)
+- `api`: une api [Express](https://expressjs.com/) app
+- `mobile`: une app [React Native](https://reactnative.dev/) et [Expo](https://expo.dev/)
+- `@lukyss-bar/eslint-config`: `eslint` configurations (inclu `eslint-config-next` et `eslint-config-prettier`)
+- `@lukyss-bar/typescript-config`: `tsconfig.json`utilisée dans le monorepo
 
-This Turborepo includes the following packages/apps:
+Chaque package/app est 100% [TypeScript](https://www.typescriptlang.org/).
 
-### Apps and Packages
+## Utilities
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- [TypeScript](https://www.typescriptlang.org/)
+- [ESLint](https://eslint.org/) pour le linting du code
+- [Prettier](https://prettier.io) pour le formattage du code
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
+<!--### Build
 
 To build all apps and packages, run the following command:
 
@@ -86,9 +80,9 @@ turbo dev --filter=web
 npx turbo dev --filter=web
 yarn exec turbo dev --filter=web
 pnpm exec turbo dev --filter=web
-```
+```-->
 
-### Remote Caching
+<!--### Remote Caching
 
 > [!TIP]
 > Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
@@ -132,4 +126,4 @@ Learn more about the power of Turborepo:
 - [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
 - [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
 - [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)-->
