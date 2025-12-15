@@ -8,7 +8,19 @@ Ce Monorepo a été créé avec [TurboRepo](https://turborepo.com/).
 ## Maquettes
 
 ### Site Web
+
+![Accueil](./.images-markdown/web/accueil.png "Page Accueil")
+![Listes](./.images-markdown/web/list.png "Liste des Cocktail")
+![Detail](./.images-markdown/web/detail.png "Page Detail")
+![Panier](./.images-markdown/web/panier.png "Page Panier")
+
 ### Application Mobile
+
+![Commandes](./.images-markdown/mobile/commandes.png "Page Commandes")
+![Historique](./.images-markdown/mobile/historique.png "Page Historique")
+![Codes](./.images-markdown/mobile/codes.png "Page Codes")
+![Cocktails](./.images-markdown/mobile/liste-cocktail.png "Page Cocktails")
+![Stocks](./.images-markdown/mobile/stock.png "Page Stocks")
 
 ## Apps and Packages
 
