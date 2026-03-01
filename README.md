@@ -25,10 +25,13 @@ Ce Monorepo a été créé avec [TurboRepo](https://turborepo.com/).
 ## Apps and Packages
 
 - `web`: une app [Next.js](https://nextjs.org/)
-- `api`: une api [Express](https://expressjs.com/) app
+- `api`: une api [NestJs](https://nestjs.com/) app
 - `mobile`: une app [React Native](https://reactnative.dev/) et [Expo](https://expo.dev/)
 - `@lukyss-bar/eslint-config`: `eslint` configurations (inclu `eslint-config-next` et `eslint-config-prettier`)
 - `@lukyss-bar/typescript-config`: `tsconfig.json`utilisée dans le monorepo
+- Better-Auth
+- Drizzle
+- Postgres
 
 Chaque package/app est 100% [TypeScript](https://www.typescriptlang.org/).
 
