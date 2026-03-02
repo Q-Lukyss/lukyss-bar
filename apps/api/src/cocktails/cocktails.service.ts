@@ -22,7 +22,7 @@ export class CocktailsService {
       .where(eq(cocktails.id, id))
       .limit(1);
 
-    if (!row) throw new NotFoundException('Cocktail not found');
+    if (!row) throw new NotFoundException('Cocktail introuvable');
     return row;
   }
 
