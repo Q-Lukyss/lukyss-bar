@@ -9,6 +9,13 @@ import type { drizzle } from 'drizzle-orm/node-postgres';
 
 type Db = ReturnType<typeof drizzle>;
 
+export type UserResponse = {
+  id: string;
+  name: string;
+  email: string;
+  is_admin: boolean;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
