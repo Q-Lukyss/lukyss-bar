@@ -1,9 +1,12 @@
 import { pgTable, text, timestamp, integer } from 'drizzle-orm/pg-core';
 import { cocktails } from './cocktails';
 import { commandes } from './commandes';
+import { ulid } from 'ulid';
 
 export const cocktailsCommandes = pgTable('cocktails_commandes', {
-  id: text('id').primaryKey(),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => ulid()),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()

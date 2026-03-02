@@ -1,7 +1,10 @@
 import { pgTable, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import { ulid } from 'ulid';
 
-export const cocktails = pgTable('coktails', {
-  id: text('id').primaryKey(),
+export const cocktails = pgTable('cocktails', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => ulid()),
   name: text('name').notNull(),
   image: text('image'),
   price: integer('price').notNull(),

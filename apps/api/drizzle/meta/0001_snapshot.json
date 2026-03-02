@@ -1,6 +1,6 @@
 {
-  "id": "84bfb266-3c33-4a0c-b73f-52ffca172d3c",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "150d9516-54c2-4688-a87c-ee6705212482",
+  "prevId": "84bfb266-3c33-4a0c-b73f-52ffca172d3c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -313,7 +313,7 @@
         },
         "stock": {
           "name": "stock",
-          "type": "integer",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true
         },

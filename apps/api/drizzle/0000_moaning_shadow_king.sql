@@ -1,4 +1,4 @@
-CREATE TABLE "coktails" (
+CREATE TABLE "cocktails" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"image" text,
@@ -20,7 +20,8 @@ CREATE TABLE "cocktails_ingredients" (
 	"id" text PRIMARY KEY NOT NULL,
 	"cocktail_id" text NOT NULL,
 	"ingredient_id" text NOT NULL,
-	"quantity" text NOT NULL,
+	"quantity" integer NOT NULL,
+	"unity" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -57,7 +58,7 @@ CREATE TABLE "users" (
 	"is_active" boolean NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "cocktails_commandes" ADD CONSTRAINT "cocktails_commandes_cocktail_id_coktails_id_fk" FOREIGN KEY ("cocktail_id") REFERENCES "public"."coktails"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "cocktails_commandes" ADD CONSTRAINT "cocktails_commandes_cocktail_id_cocktails_id_fk" FOREIGN KEY ("cocktail_id") REFERENCES "public"."cocktails"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cocktails_commandes" ADD CONSTRAINT "cocktails_commandes_commande_id_commandes_id_fk" FOREIGN KEY ("commande_id") REFERENCES "public"."commandes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "cocktails_ingredients" ADD CONSTRAINT "cocktails_ingredients_cocktail_id_coktails_id_fk" FOREIGN KEY ("cocktail_id") REFERENCES "public"."coktails"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "cocktails_ingredients" ADD CONSTRAINT "cocktails_ingredients_cocktail_id_cocktails_id_fk" FOREIGN KEY ("cocktail_id") REFERENCES "public"."cocktails"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cocktails_ingredients" ADD CONSTRAINT "cocktails_ingredients_ingredient_id_ingredients_id_fk" FOREIGN KEY ("ingredient_id") REFERENCES "public"."ingredients"("id") ON DELETE no action ON UPDATE no action;

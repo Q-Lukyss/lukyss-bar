@@ -41,6 +41,16 @@ Chaque package/app est 100% [TypeScript](https://www.typescriptlang.org/).
 - [ESLint](https://eslint.org/) pour le linting du code
 - [Prettier](https://prettier.io) pour le formattage du code
 
+## Seed Data
+
+up le container postgres
+
+```
+npm -w @lukyss-bar/api run db:generate
+npm -w @lukyss-bar/api run db:migrate
+npm -w @lukyss-bar/api run db:seed
+```
+
 <!--### Build
 
 To build all apps and packages, run the following command:
