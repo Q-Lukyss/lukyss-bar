@@ -1,17 +1,23 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 
-import { db } from '../drizzle/db';
-import { users } from '../drizzle/schema'; // adapte le chemin exact
+import { DB } from '../db/db.module';
+import { users } from '../drizzle/schema';
+import type { drizzle } from 'drizzle-orm/node-postgres';
+
+type Db = ReturnType<typeof drizzle>;
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    @Inject(DB) private readonly db: Db,
+  ) {}
 
   async login(email: string, password: string) {
-    const [user] = await db
+    const [user] = await this.db
       .select()
       .from(users)
       .where(eq(users.email, email))

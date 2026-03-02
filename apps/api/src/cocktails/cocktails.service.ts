@@ -1,18 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
-import { db } from '../drizzle/db';
-import { cocktails } from '../drizzle/schema'; // adapte le chemin exact
-import { CreateCocktailDto } from './dto/create-cocktail.dto';
+import { DB } from '../db/db.module';
+import { cocktails } from '../drizzle/schema';
+import type { drizzle } from 'drizzle-orm/node-postgres';
+
+type Db = ReturnType<typeof drizzle>;
 
 @Injectable()
 export class CocktailsService {
+  constructor(@Inject(DB) private readonly db: Db) {}
+
   async list() {
-    return db.select().from(cocktails);
+    return this.db.select().from(cocktails);
   }
 
   async getById(id: string) {
-    const [row] = await db
+    const [row] = await this.db
       .select()
       .from(cocktails)
       .where(eq(cocktails.id, id))
@@ -22,8 +26,8 @@ export class CocktailsService {
     return row;
   }
 
-  async create(dto: CreateCocktailDto) {
-    const [created] = await db
+  async create(dto: { name: string; image?: string | null; price: number }) {
+    const [created] = await this.db
       .insert(cocktails)
       .values({
         name: dto.name,
