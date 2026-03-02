@@ -19,7 +19,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepare": "ts-patch install"
+    "prepare": "ts-patch install",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@nestia/core": "^10.0.2",
@@ -31,7 +33,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "drizzle-orm": "^0.45.1",
     "neverthrow": "^8.2.0",
-    "pg": "^8.18.0",
+    "pg": "^8.19.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typia": "^11.0.3",
@@ -49,7 +51,7 @@
     "@types/node": "^22.10.7",
     "@types/pg": "^8.16.0",
     "@types/supertest": "^6.0.2",
-    "drizzle-kit": "^0.31.8",
+    "drizzle-kit": "^0.31.9",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
