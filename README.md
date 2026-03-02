@@ -51,6 +51,32 @@ npm -w @lukyss-bar/api run db:migrate
 npm -w @lukyss-bar/api run db:seed
 ```
 
+## API
+
+### impératifs nest cours
+
+
+- Utiliser Nest, Nestia, Temps réel, SDK FrontEnd Nestia
+- Utiliser une abstraction supplémentaire pour nest -> les répository
+- utiliser la clean archi
+- neverthrow pour Monade ResultAsync
+- Mono repo sur LukyssBar
+
+### fonctionnalités
+
+- liste des cocktails
+- cocktails par id
+- créer un cocktail si users admin
+- voir les commandes si user admin
+- update le statut des commande si admin + websocket tps reel
+- générer des codes promo si user admin
+- gérer le stock si admin
+	- créer un ingrédient
+	- passer un ingrédient de false a true et inversement
+- modifier un coktail si user admin
+- faire une commande si user normal + code promo pour valdier commande
+	-> retourne liste cocktails, code promo utilisé, puis objet commande avec statut et prix total
+
 <!--### Build
 
 To build all apps and packages, run the following command:
