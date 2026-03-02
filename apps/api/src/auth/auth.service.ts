@@ -31,13 +31,19 @@ export class AuthService {
 
     const payload = {
       sub: user.id,
+      name: user.name,
       email: user.email,
       is_admin: user.is_admin,
     };
 
     return {
       access_token: await this.jwt.signAsync(payload),
-      user: { id: user.id, email: user.email, is_admin: user.is_admin },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        is_admin: user.is_admin,
+      },
     };
   }
 }
