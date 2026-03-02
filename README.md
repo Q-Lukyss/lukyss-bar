@@ -64,18 +64,20 @@ npm -w @lukyss-bar/api run db:seed
 
 ### fonctionnalités
 
-- liste des cocktails
-- cocktails par id
-- créer un cocktail si users admin
+- liste des cocktails - ok
+- cocktails par id - ok
+- créer un cocktail si users admin - ok
+- modifier un coktail si user admin
+- ajouter/modifier/supprimer des ingrédients a un cocktail si user admin
+- modifier un ingredient si user admin
 - voir les commandes si user admin
-- update le statut des commande si admin + websocket tps reel
-- générer des codes promo si user admin
+- générer des codes promo si user admin - ok
 - gérer le stock si admin
 	- créer un ingrédient
 	- passer un ingrédient de false a true et inversement
-- modifier un coktail si user admin
 - faire une commande si user normal + code promo pour valdier commande
 	-> retourne liste cocktails, code promo utilisé, puis objet commande avec statut et prix total
+- update le statut des commande si admin + websocket tps reel
 
 ### packages
 
