@@ -77,6 +77,13 @@ npm -w @lukyss-bar/api run db:seed
 - faire une commande si user normal + code promo pour valdier commande
 	-> retourne liste cocktails, code promo utilisé, puis objet commande avec statut et prix total
 
+### packages
+
+- pg pour accès db postgres
+- passport pour authentification
+- bcrypt pour hashage de mot de passe
+
+
 <!--### Build
 
 To build all apps and packages, run the following command:

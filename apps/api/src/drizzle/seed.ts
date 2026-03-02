@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import * as bcrypt from 'bcrypt';
 
 import {
   ingredients,
@@ -150,11 +151,12 @@ async function main() {
   await db.insert(codes).values([{ code: 'GRANDOPENING' }]);
 
   // Users
+  const hashed = await bcrypt.hash('masterbarman', 10);
   await db.insert(users).values([
     {
       name: 'Quentin Lachery',
       email: 'quentin.lkss@gmail.com',
-      password: 'masterbarman',
+      password: hashed,
       is_active: true,
       is_admin: true,
     },
