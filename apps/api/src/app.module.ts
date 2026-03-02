@@ -6,6 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { CocktailsModule } from './cocktails/cocktails.module';
 import { CodesModule } from './codes/codes.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -19,5 +21,7 @@ import { IngredientsModule } from './ingredients/ingredients.module';
     CodesModule,
     IngredientsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
