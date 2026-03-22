@@ -38,4 +38,24 @@ export class CocktailsService {
 
     return created;
   }
+
+  async update(
+    id: string,
+    dto: { name?: string; image?: string | null; price?: number },
+  ) {
+    await this.getById(id);
+
+    const [updated] = await this.db
+      .update(cocktails)
+      .set({
+        ...(dto.name !== undefined ? { name: dto.name } : {}),
+        ...(dto.price !== undefined ? { price: dto.price } : {}),
+        ...(dto.image !== undefined ? { image: dto.image } : {}),
+      })
+      .where(eq(cocktails.id, id))
+      .returning();
+
+    if (!updated) throw new NotFoundException('Cocktail introuvable');
+    return updated;
+  }
 }
