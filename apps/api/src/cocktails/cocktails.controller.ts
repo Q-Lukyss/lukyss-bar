@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
   BadRequestException,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -17,6 +18,8 @@ import { existsSync, mkdirSync } from 'fs';
 import { CocktailsService } from './cocktails.service';
 import { CreateCocktailDto } from './dto/create-cocktail.dto';
 import { UpdateCocktailDto } from './dto/update-cocktail.dto';
+import { AddCocktailIngredientDto } from './dto/add-cocktail-ingredient.dto';
+import { UpdateCocktailIngredientDto } from './dto/update-cocktail-ingredient.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -117,5 +120,48 @@ export class CocktailsController {
       ...dto,
       ...(file ? { image: `/uploads/cocktails/${file.filename}` } : {}),
     });
+  }
+
+  @Get(':cocktailId/ingredients')
+  getCocktailIngredients(@Param('cocktailId') cocktailId: string) {
+    return this.service.getCocktailIngredients(cocktailId);
+  }
+
+  @Post(':cocktailId/ingredients')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  addIngredient(
+    @Param('cocktailId') cocktailId: string,
+    @Body() dto: AddCocktailIngredientDto,
+  ) {
+    return this.service.addIngredientToCocktail(cocktailId, dto);
+  }
+
+  @Patch(':cocktailId/ingredients/:cocktailIngredientId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  updateIngredient(
+    @Param('cocktailId') cocktailId: string,
+    @Param('cocktailIngredientId') cocktailIngredientId: string,
+    @Body() dto: UpdateCocktailIngredientDto,
+  ) {
+    return this.service.updateCocktailIngredient(
+      cocktailId,
+      cocktailIngredientId,
+      dto,
+    );
+  }
+
+  @Delete(':cocktailId/ingredients/:cocktailIngredientId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  deleteIngredient(
+    @Param('cocktailId') cocktailId: string,
+    @Param('cocktailIngredientId') cocktailIngredientId: string,
+  ) {
+    return this.service.deleteCocktailIngredient(
+      cocktailId,
+      cocktailIngredientId,
+    );
   }
 }
