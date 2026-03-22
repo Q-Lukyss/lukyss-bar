@@ -90,7 +90,7 @@ export class CocktailsService {
     id: string,
     dto: { name?: string; image?: string | null; price?: number },
   ) {
-    await this.getById(id);
+    await this.ensureCocktailExists(id);
 
     const [updated] = await this.db
       .update(cocktails)
@@ -114,7 +114,7 @@ export class CocktailsService {
       unity: string;
     },
   ): Promise<CocktailIngredient> {
-    await this.getById(cocktailId);
+    await this.ensureCocktailExists(cocktailId);
 
     const [ingredient] = await this.db
       .select()
@@ -171,7 +171,7 @@ export class CocktailsService {
       unity?: string;
     },
   ): Promise<CocktailIngredient> {
-    await this.getById(cocktailId);
+    await this.ensureCocktailExists(cocktailId);
 
     const [link] = await this.db
       .select()
@@ -244,7 +244,7 @@ export class CocktailsService {
     cocktailId: string,
     cocktailIngredientId: string,
   ): Promise<{ message: string }> {
-    await this.getById(cocktailId);
+    await this.ensureCocktailExists(cocktailId);
 
     const [link] = await this.db
       .select()
@@ -293,5 +293,19 @@ export class CocktailsService {
         eq(cocktailsIngredients.ingredientId, ingredients.id),
       )
       .where(eq(cocktailsIngredients.cocktailId, cocktailId));
+  }
+
+  private async ensureCocktailExists(id: string) {
+    const [cocktail] = await this.db
+      .select()
+      .from(cocktails)
+      .where(eq(cocktails.id, id))
+      .limit(1);
+
+    if (!cocktail) {
+      throw new NotFoundException('Cocktail introuvable');
+    }
+
+    return cocktail;
   }
 }
