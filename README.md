@@ -73,10 +73,11 @@ npm -w @lukyss-bar/api run db:seed
 - ajouter/modifier/supprimer des ingrédients a un cocktail si user admin - ok
 - gérer le stock si admin - ok
 	- passer un ingrédient de false a true et inversement - ok
-- creer et lire une commande - user
-- voir les commandes si user admin
-- faire une commande si user normal + code promo pour valdier commande
+- creer et lire une commande - user - ok
+- voir les commandes si user admin - ok 
+- faire une commande si user normal + code promo pour valdier commande - ok
 	-> retourne liste cocktails, code promo utilisé, puis objet commande avec statut et prix total
+- Editer le Status d'une commande admin - ok
 - Ajouter Nestia et sdk front
 - Neverthrow
 - temps reel pour suivi de commande (commande en attente d'acceptation, acceptee, en preparation, prete)
