@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, InferSelectModel } from 'drizzle-orm';
 import type { drizzle } from 'drizzle-orm/node-postgres';
 import { randomBytes } from 'crypto';
 
@@ -15,7 +15,12 @@ import {
   codes,
   commandes,
 } from '../drizzle/schema';
-import { COMMANDE_STATUS } from './commandes.constants';
+
+import type {
+  CommandeRow,
+  CommandeView,
+  CommandeStatus,
+} from '../../domain/entities/commande';
 
 type Db = ReturnType<typeof drizzle>;
 
@@ -35,7 +40,7 @@ export class CommandesService {
     customerName: string;
     promoCode: string;
     items: Array<{ cocktailId: string; quantity: number }>;
-  }) {
+  }): Promise<CommandeView> {
     const promoCode = this.normalizeCode(dto.promoCode);
 
     const [existingCode] = await this.db
@@ -102,7 +107,7 @@ export class CommandesService {
     return this.getById(createdCommande.id);
   }
 
-  async getById(id: string) {
+  async getById(id: string): Promise<CommandeView> {
     const [commande] = await this.db
       .select()
       .from(commandes)
@@ -135,7 +140,7 @@ export class CommandesService {
     };
   }
 
-  async getByPublicToken(publicToken: string) {
+  async getByPublicToken(publicToken: string): Promise<CommandeView> {
     const [commande] = await this.db
       .select()
       .from(commandes)
@@ -149,15 +154,11 @@ export class CommandesService {
     return this.getById(commande.id);
   }
 
-  async listAll() {
+  async listAll(): Promise<CommandeRow[]> {
     return this.db.select().from(commandes);
   }
 
-  async updateStatus(id: string, status: string) {
-    if (!Object.values(COMMANDE_STATUS).includes(status as never)) {
-      throw new BadRequestException('Statut de commande invalide');
-    }
-
+  async updateStatus(id: string, status: CommandeStatus): Promise<CommandeRow> {
     const [updated] = await this.db
       .update(commandes)
       .set({ status })
