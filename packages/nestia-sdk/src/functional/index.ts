@@ -8,3 +8,4 @@ export * as commandes from "./commandes/index";
 export * as codes from "./codes/index";
 export * as ingredients from "./ingredients/index";
 export * as cocktails from "./cocktails/index";
+export * as auth from "./auth/index";

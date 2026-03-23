@@ -6,6 +6,7 @@ const config: INestiaConfig = {
     './src/codes/codes.controller.ts',
     './src/ingredients/ingredients.controller.ts',
     './src/cocktails/cocktails.controller.ts',
+    './src/auth/auth.controller.ts',
   ],
   output: '../../packages/nestia-sdk/src',
   // distribute: '../../packages/nestia-sdk',
