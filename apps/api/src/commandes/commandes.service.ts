@@ -82,7 +82,7 @@ export class CommandesService {
         customerName: dto.customerName,
         promoCode,
         publicToken: this.generatePublicToken(),
-        status: 'pending',
+        status: 'PENDING',
         totalPrice,
       })
       .returning();
