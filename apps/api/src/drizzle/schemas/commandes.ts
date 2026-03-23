@@ -1,7 +1,7 @@
 import { integer, pgTable, text, timestamp, pgEnum } from 'drizzle-orm/pg-core';
 import { ulid } from 'ulid';
 
-const commandeStatusEnum = pgEnum('commande_status', [
+export const commandeStatusEnum = pgEnum('commande_status', [
   'PENDING',
   'CONFIRMED',
   'IN_PREPARATION',
