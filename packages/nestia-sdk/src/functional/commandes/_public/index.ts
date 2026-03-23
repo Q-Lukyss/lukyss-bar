@@ -8,7 +8,7 @@ import type { IConnection } from "@nestia/fetcher";
 import { PlainFetcher } from "@nestia/fetcher";
 import type { Primitive } from "typia";
 
-import type { CommandeView } from "../../../../../../apps/api/domain/entities/commande";
+import type { CommandeView } from "../../../../../../apps/api/domain/entities/commandes";
 
 /**
  * @controller CommandesController.getByPublicToken

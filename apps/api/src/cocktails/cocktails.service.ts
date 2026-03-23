@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, and, InferSelectModel } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import type { drizzle } from 'drizzle-orm/node-postgres';
 
 import { DB } from '../db/db.module';
 import {
@@ -12,33 +13,34 @@ import {
   cocktailsIngredients,
   ingredients,
 } from '../drizzle/schema';
-import type { drizzle } from 'drizzle-orm/node-postgres';
+import type {
+  CocktailIngredientLinkRow,
+  CocktailIngredientListItem,
+  CocktailRow,
+  CocktailView,
+  DeleteMessage,
+} from '../../domain/entities/cocktails';
 
 type Db = ReturnType<typeof drizzle>;
-type Cocktail = InferSelectModel<typeof cocktails>;
-type CocktailIngredient = InferSelectModel<typeof cocktailsIngredients>;
-type CocktailWithIngredients = Cocktail & {
-  ingredients: Array<{
-    id: string;
-    ingredientId: string;
-    name: string;
-    stock: boolean;
-    quantity: number;
-    unity: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-};
 
 @Injectable()
 export class CocktailsService {
   constructor(@Inject(DB) private readonly db: Db) {}
 
-  async list() {
-    return this.db.select().from(cocktails);
+  async list(): Promise<CocktailRow[]> {
+    const rows = await this.db.select().from(cocktails);
+
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      image: row.image,
+      price: row.price,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    }));
   }
 
-  async getById(id: string): Promise<CocktailWithIngredients> {
+  async getById(id: string): Promise<CocktailView> {
     const [cocktail] = await this.db
       .select()
       .from(cocktails)
@@ -68,12 +70,30 @@ export class CocktailsService {
       .where(eq(cocktailsIngredients.cocktailId, id));
 
     return {
-      ...cocktail,
-      ingredients: cocktailIngredientsRows,
+      id: cocktail.id,
+      name: cocktail.name,
+      image: cocktail.image,
+      price: cocktail.price,
+      createdAt: cocktail.createdAt,
+      updatedAt: cocktail.updatedAt,
+      ingredients: cocktailIngredientsRows.map((row) => ({
+        id: row.id,
+        ingredientId: row.ingredientId,
+        name: row.name,
+        stock: row.stock,
+        quantity: row.quantity,
+        unity: row.unity,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      })),
     };
   }
 
-  async create(dto: { name: string; image?: string | null; price: number }) {
+  async create(dto: {
+    name: string;
+    image?: string | null;
+    price: number;
+  }): Promise<CocktailRow> {
     const [created] = await this.db
       .insert(cocktails)
       .values({
@@ -83,13 +103,24 @@ export class CocktailsService {
       })
       .returning();
 
-    return created;
+    if (!created) {
+      throw new BadRequestException('Impossible de créer le cocktail');
+    }
+
+    return {
+      id: created.id,
+      name: created.name,
+      image: created.image,
+      price: created.price,
+      createdAt: created.createdAt,
+      updatedAt: created.updatedAt,
+    };
   }
 
   async update(
     id: string,
     dto: { name?: string; image?: string | null; price?: number },
-  ) {
+  ): Promise<CocktailRow> {
     await this.ensureCocktailExists(id);
 
     const [updated] = await this.db
@@ -102,8 +133,18 @@ export class CocktailsService {
       .where(eq(cocktails.id, id))
       .returning();
 
-    if (!updated) throw new NotFoundException('Cocktail introuvable');
-    return updated;
+    if (!updated) {
+      throw new NotFoundException('Cocktail introuvable');
+    }
+
+    return {
+      id: updated.id,
+      name: updated.name,
+      image: updated.image,
+      price: updated.price,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
   }
 
   async addIngredientToCocktail(
@@ -113,7 +154,7 @@ export class CocktailsService {
       quantity: number;
       unity: string;
     },
-  ): Promise<CocktailIngredient> {
+  ): Promise<CocktailIngredientLinkRow> {
     await this.ensureCocktailExists(cocktailId);
 
     const [ingredient] = await this.db
@@ -159,7 +200,15 @@ export class CocktailsService {
       );
     }
 
-    return created;
+    return {
+      id: created.id,
+      cocktailId: created.cocktailId,
+      ingredientId: created.ingredientId,
+      quantity: created.quantity,
+      unity: created.unity,
+      createdAt: created.createdAt,
+      updatedAt: created.updatedAt,
+    };
   }
 
   async updateCocktailIngredient(
@@ -170,7 +219,7 @@ export class CocktailsService {
       quantity?: number;
       unity?: string;
     },
-  ): Promise<CocktailIngredient> {
+  ): Promise<CocktailIngredientLinkRow> {
     await this.ensureCocktailExists(cocktailId);
 
     const [link] = await this.db
@@ -237,13 +286,21 @@ export class CocktailsService {
       );
     }
 
-    return updated;
+    return {
+      id: updated.id,
+      cocktailId: updated.cocktailId,
+      ingredientId: updated.ingredientId,
+      quantity: updated.quantity,
+      unity: updated.unity,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
   }
 
   async deleteCocktailIngredient(
     cocktailId: string,
     cocktailIngredientId: string,
-  ): Promise<{ message: string }> {
+  ): Promise<DeleteMessage> {
     await this.ensureCocktailExists(cocktailId);
 
     const [link] = await this.db
@@ -272,10 +329,12 @@ export class CocktailsService {
     };
   }
 
-  async getCocktailIngredients(cocktailId: string) {
-    await this.getById(cocktailId);
+  async getCocktailIngredients(
+    cocktailId: string,
+  ): Promise<CocktailIngredientListItem[]> {
+    await this.ensureCocktailExists(cocktailId);
 
-    return this.db
+    const rows = await this.db
       .select({
         id: cocktailsIngredients.id,
         cocktailId: cocktailsIngredients.cocktailId,
@@ -293,9 +352,21 @@ export class CocktailsService {
         eq(cocktailsIngredients.ingredientId, ingredients.id),
       )
       .where(eq(cocktailsIngredients.cocktailId, cocktailId));
+
+    return rows.map((row) => ({
+      id: row.id,
+      cocktailId: row.cocktailId,
+      ingredientId: row.ingredientId,
+      quantity: row.quantity,
+      unity: row.unity,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      ingredientName: row.ingredientName,
+      ingredientStock: row.ingredientStock,
+    }));
   }
 
-  private async ensureCocktailExists(id: string) {
+  private async ensureCocktailExists(id: string): Promise<CocktailRow> {
     const [cocktail] = await this.db
       .select()
       .from(cocktails)
@@ -306,6 +377,13 @@ export class CocktailsService {
       throw new NotFoundException('Cocktail introuvable');
     }
 
-    return cocktail;
+    return {
+      id: cocktail.id,
+      name: cocktail.name,
+      image: cocktail.image,
+      price: cocktail.price,
+      createdAt: cocktail.createdAt,
+      updatedAt: cocktail.updatedAt,
+    };
   }
 }

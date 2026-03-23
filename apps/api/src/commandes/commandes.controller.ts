@@ -7,7 +7,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UpdateCommandeStatusDto } from './dto/update-commande-status.dto';
-import type { CommandeRow, CommandeView } from '../../domain/entities/commande';
+import type {
+  CommandeRow,
+  CommandeView,
+} from '../../domain/entities/commandes';
 
 @Controller('commandes')
 export class CommandesController {

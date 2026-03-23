@@ -20,7 +20,7 @@ import type {
   CommandeRow,
   CommandeView,
   CommandeStatus,
-} from '../../domain/entities/commande';
+} from '../../domain/entities/commandes';
 
 type Db = ReturnType<typeof drizzle>;
 

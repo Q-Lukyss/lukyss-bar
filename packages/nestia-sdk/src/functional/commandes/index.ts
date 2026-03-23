@@ -11,7 +11,7 @@ import type { Primitive } from "typia";
 import type {
   CommandeRow,
   CommandeView,
-} from "../../../../../apps/api/domain/entities/commande";
+} from "../../../../../apps/api/domain/entities/commandes";
 import type { CreateCommandeDto } from "../../../../../apps/api/src/commandes/dto/create-commande.dto";
 
 export * as _public from "./_public/index";

@@ -1,150 +1,103 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-  BadRequestException,
-  Delete,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { Controller, UseGuards } from '@nestjs/common';
+import { TypedBody, TypedFormData, TypedParam, TypedRoute } from '@nestia/core';
+
 import { CocktailsService } from './cocktails.service';
-import { CreateCocktailDto } from './dto/create-cocktail.dto';
-import { UpdateCocktailDto } from './dto/update-cocktail.dto';
+import { CocktailImagesService } from './cocktails-images.service';
 import { AddCocktailIngredientDto } from './dto/add-cocktail-ingredient.dto';
 import { UpdateCocktailIngredientDto } from './dto/update-cocktail-ingredient.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
+import Multer from 'multer';
 
-const uploadPath = 'uploads/cocktails';
-
-if (!existsSync(uploadPath)) {
-  mkdirSync(uploadPath, { recursive: true });
-}
-
-function editFileName(
-  _req: Express.Request,
-  file: Express.Multer.File,
-  callback: (error: Error | null, filename: string) => void,
-) {
-  const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-  const extension = extname(file.originalname);
-  callback(null, `cocktail-${uniqueSuffix}${extension}`);
-}
-
-function imageFileFilter(
-  _req: Express.Request,
-  file: Express.Multer.File,
-  callback: (error: Error | null, acceptFile: boolean) => void,
-) {
-  if (!file.mimetype.match(/^image\/(jpeg|jpg|png|webp)$/)) {
-    return callback(
-      new BadRequestException(
-        'Seules les images jpg, jpeg, png, webp sont autorisées',
-      ),
-      false,
-    );
-  }
-
-  callback(null, true);
-}
+import type {
+  CocktailIngredientLinkRow,
+  CocktailIngredientListItem,
+  CocktailRow,
+  CocktailView,
+  DeleteMessage,
+} from '../../domain/entities/cocktails';
+import type {
+  CreateCocktailFormData,
+  UpdateCocktailFormData,
+} from './cocktails.form-types';
 
 @Controller('cocktails')
 export class CocktailsController {
-  constructor(private readonly service: CocktailsService) {}
+  constructor(
+    private readonly service: CocktailsService,
+    private readonly imagesService: CocktailImagesService,
+  ) {}
 
-  @Get()
-  list() {
+  @TypedRoute.Get()
+  list(): Promise<CocktailRow[]> {
     return this.service.list();
   }
 
-  @Get(':id')
-  getById(@Param('id') id: string) {
+  @TypedRoute.Get(':id')
+  getById(@TypedParam('id') id: string): Promise<CocktailView> {
     return this.service.getById(id);
   }
 
-  @Post()
+  @TypedRoute.Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: uploadPath,
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-      limits: {
-        fileSize: 5 * 1024 * 1024,
-      },
-    }),
-  )
-  create(
-    @Body() dto: CreateCocktailDto,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
+  async create(
+    @TypedFormData.Body(() => Multer()) input: CreateCocktailFormData,
+  ): Promise<CocktailRow> {
+    const imagePath = await this.imagesService.saveImage(input.image ?? null);
+
     return this.service.create({
-      ...dto,
-      image: file ? `/uploads/cocktails/${file.filename}` : null,
+      name: input.name,
+      price: input.price,
+      image: imagePath,
     });
   }
 
-  @Patch(':id')
+  @TypedRoute.Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: uploadPath,
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-      limits: {
-        fileSize: 5 * 1024 * 1024,
-      },
-    }),
-  )
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateCocktailDto,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
+  async update(
+    @TypedParam('id') id: string,
+    @TypedFormData.Body(() => Multer()) input: UpdateCocktailFormData,
+  ): Promise<CocktailRow> {
+    const imagePath =
+      input.image !== undefined
+        ? await this.imagesService.saveImage(input.image)
+        : undefined;
+
     return this.service.update(id, {
-      ...dto,
-      ...(file ? { image: `/uploads/cocktails/${file.filename}` } : {}),
+      ...(input.name !== undefined ? { name: input.name } : {}),
+      ...(input.price !== undefined ? { price: input.price } : {}),
+      ...(imagePath !== undefined ? { image: imagePath } : {}),
     });
   }
 
-  @Get(':cocktailId/ingredients')
-  getCocktailIngredients(@Param('cocktailId') cocktailId: string) {
+  @TypedRoute.Get(':cocktailId/ingredients')
+  getCocktailIngredients(
+    @TypedParam('cocktailId') cocktailId: string,
+  ): Promise<CocktailIngredientListItem[]> {
     return this.service.getCocktailIngredients(cocktailId);
   }
 
-  @Post(':cocktailId/ingredients')
+  @TypedRoute.Post(':cocktailId/ingredients')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   addIngredient(
-    @Param('cocktailId') cocktailId: string,
-    @Body() dto: AddCocktailIngredientDto,
-  ) {
+    @TypedParam('cocktailId') cocktailId: string,
+    @TypedBody() dto: AddCocktailIngredientDto,
+  ): Promise<CocktailIngredientLinkRow> {
     return this.service.addIngredientToCocktail(cocktailId, dto);
   }
 
-  @Patch(':cocktailId/ingredients/:cocktailIngredientId')
+  @TypedRoute.Patch(':cocktailId/ingredients/:cocktailIngredientId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   updateIngredient(
-    @Param('cocktailId') cocktailId: string,
-    @Param('cocktailIngredientId') cocktailIngredientId: string,
-    @Body() dto: UpdateCocktailIngredientDto,
-  ) {
+    @TypedParam('cocktailId') cocktailId: string,
+    @TypedParam('cocktailIngredientId') cocktailIngredientId: string,
+    @TypedBody() dto: UpdateCocktailIngredientDto,
+  ): Promise<CocktailIngredientLinkRow> {
     return this.service.updateCocktailIngredient(
       cocktailId,
       cocktailIngredientId,
@@ -152,13 +105,13 @@ export class CocktailsController {
     );
   }
 
-  @Delete(':cocktailId/ingredients/:cocktailIngredientId')
+  @TypedRoute.Delete(':cocktailId/ingredients/:cocktailIngredientId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   deleteIngredient(
-    @Param('cocktailId') cocktailId: string,
-    @Param('cocktailIngredientId') cocktailIngredientId: string,
-  ) {
+    @TypedParam('cocktailId') cocktailId: string,
+    @TypedParam('cocktailIngredientId') cocktailIngredientId: string,
+  ): Promise<DeleteMessage> {
     return this.service.deleteCocktailIngredient(
       cocktailId,
       cocktailIngredientId,

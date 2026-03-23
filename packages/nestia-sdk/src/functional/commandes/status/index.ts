@@ -8,7 +8,7 @@ import type { IConnection } from "@nestia/fetcher";
 import { PlainFetcher } from "@nestia/fetcher";
 import type { Primitive } from "typia";
 
-import type { CommandeRow } from "../../../../../../apps/api/domain/entities/commande";
+import type { CommandeRow } from "../../../../../../apps/api/domain/entities/commandes";
 import type { UpdateCommandeStatusDto } from "../../../../../../apps/api/src/commandes/dto/update-commande-status.dto";
 
 /**
