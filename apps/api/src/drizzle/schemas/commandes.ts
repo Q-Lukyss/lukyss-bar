@@ -1,5 +1,13 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { integer, pgTable, text, timestamp, pgEnum } from 'drizzle-orm/pg-core';
 import { ulid } from 'ulid';
+
+const commandeStatusEnum = pgEnum('commande_status', [
+  'PENDING',
+  'CONFIRMED',
+  'IN_PREPARATION',
+  'READY',
+  'COMPLETED',
+]);
 
 export const commandes = pgTable('commandes', {
   id: text('id')
@@ -14,5 +22,5 @@ export const commandes = pgTable('commandes', {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-  status: text('status').notNull(),
+  status: commandeStatusEnum('status').notNull().default('PENDING'),
 });

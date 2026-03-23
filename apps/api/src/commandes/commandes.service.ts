@@ -15,6 +15,7 @@ import {
   codes,
   commandes,
 } from '../drizzle/schema';
+import { COMMANDE_STATUS } from './commandes.constants';
 
 type Db = ReturnType<typeof drizzle>;
 
@@ -150,5 +151,23 @@ export class CommandesService {
 
   async listAll() {
     return this.db.select().from(commandes);
+  }
+
+  async updateStatus(id: string, status: string) {
+    if (!Object.values(COMMANDE_STATUS).includes(status as never)) {
+      throw new BadRequestException('Statut de commande invalide');
+    }
+
+    const [updated] = await this.db
+      .update(commandes)
+      .set({ status })
+      .where(eq(commandes.id, id))
+      .returning();
+
+    if (!updated) {
+      throw new NotFoundException('Commande introuvable');
+    }
+
+    return updated;
   }
 }
