@@ -78,7 +78,7 @@ npm -w @lukyss-bar/api run db:seed
 - faire une commande si user normal + code promo pour valdier commande - ok
 	-> retourne liste cocktails, code promo utilisé, puis objet commande avec statut et prix total
 - Editer le Status d'une commande admin - ok
-- Ajouter Nestia et sdk front
+- Ajouter Nestia et sdk front - ok (a tester)
 - temps reel pour suivi de commande (commande en attente d'acceptation, acceptee, en preparation, prete)
 - auto doc swagger pour l'api
 
