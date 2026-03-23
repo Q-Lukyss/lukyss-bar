@@ -18,7 +18,7 @@ async function bootstrap() {
       transformerPackage: classTransformer,
     }),
   );
-  const port = Number(process.env.PORT ?? 3000);
+  const port = Number(process.env.PORT ?? 3001);
 
   const document = await NestiaSwaggerComposer.document(app, {
     openapi: '3.1',
