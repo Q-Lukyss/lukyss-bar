@@ -80,7 +80,14 @@ npm -w @lukyss-bar/api run db:seed
 - Editer le Status d'une commande admin - ok
 - Ajouter Nestia et sdk front - ok (a tester)
 - temps reel pour suivi de commande (commande en attente d'acceptation, acceptee, en preparation, prete)
-- auto doc swagger pour l'api
+- auto doc swagger pour l'api - ok sur /docs et /docs-json
+- Front Next
+  - Page Accueil
+  - Page cocktails
+  - Page cocktails details
+  - Page Commande
+  - Page front suivi commande
+- Front Mobile
 
 ### packages
 
