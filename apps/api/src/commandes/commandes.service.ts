@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, inArray, InferSelectModel } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import type { drizzle } from 'drizzle-orm/node-postgres';
 import { randomBytes } from 'crypto';
 
