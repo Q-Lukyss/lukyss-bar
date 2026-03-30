@@ -6,15 +6,9 @@ import { eq } from 'drizzle-orm';
 import { DB } from '../db/db.module';
 import { users } from '../drizzle/schema';
 import type { drizzle } from 'drizzle-orm/node-postgres';
+import type { AuthUser, LoginResponse } from '../../domain/entities/auth';
 
 type Db = ReturnType<typeof drizzle>;
-
-export type UserResponse = {
-  id: string;
-  name: string;
-  email: string;
-  is_admin: boolean;
-};
 
 @Injectable()
 export class AuthService {
@@ -23,7 +17,7 @@ export class AuthService {
     @Inject(DB) private readonly db: Db,
   ) {}
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<LoginResponse> {
     const [user] = await this.db
       .select()
       .from(users)
@@ -36,8 +30,9 @@ export class AuthService {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
 
-    const payload = {
+    const payload: AuthUser & { sub: string } = {
       sub: user.id,
+      id: user.id,
       name: user.name,
       email: user.email,
       is_admin: user.is_admin,

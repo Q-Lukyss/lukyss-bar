@@ -29,7 +29,6 @@ Ce Monorepo a été créé avec [TurboRepo](https://turborepo.com/).
 - `mobile`: une app [React Native](https://reactnative.dev/) et [Expo](https://expo.dev/)
 - `@lukyss-bar/eslint-config`: `eslint` configurations (inclu `eslint-config-next` et `eslint-config-prettier`)
 - `@lukyss-bar/typescript-config`: `tsconfig.json`utilisée dans le monorepo
-- Better-Auth
 - Drizzle
 - Postgres
 
@@ -69,17 +68,28 @@ npm -w @lukyss-bar/api run db:seed
 - liste des cocktails - ok
 - cocktails par id - ok
 - créer un cocktail si users admin - ok
-- modifier un coktail si user admin
-- ajouter/modifier/supprimer des ingrédients a un cocktail si user admin
-- modifier un ingredient si user admin
-- voir les commandes si user admin
 - générer des codes promo si user admin - ok
-- gérer le stock si admin
-	- créer un ingrédient
-	- passer un ingrédient de false a true et inversement
-- faire une commande si user normal + code promo pour valdier commande
+- modifier un coktail si user admin (image, nom, prix) - ok
+- save image dans /upload - ok
+- crud ingredient si user admin - ok
+- ajouter/modifier/supprimer des ingrédients a un cocktail si user admin - ok
+- gérer le stock si admin - ok
+	- passer un ingrédient de false a true et inversement - ok
+- creer et lire une commande - user - ok
+- voir les commandes si user admin - ok 
+- faire une commande si user normal + code promo pour valdier commande - ok
 	-> retourne liste cocktails, code promo utilisé, puis objet commande avec statut et prix total
-- update le statut des commande si admin + websocket tps reel
+- Editer le Status d'une commande admin - ok
+- Ajouter Nestia et sdk front - ok (a tester)
+- temps reel pour suivi de commande (commande en attente d'acceptation, acceptee, en preparation, prete)
+- auto doc swagger pour l'api - ok sur /docs et /docs-json
+- Front Next
+  - Page Accueil
+  - Page cocktails
+  - Page cocktails details
+  - Page Commande
+  - Page front suivi commande
+- Front Mobile
 
 ### packages
 

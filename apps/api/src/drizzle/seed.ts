@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 import {
   ingredients,
@@ -11,7 +12,11 @@ import {
   cocktailsCommandes,
   codes,
   users,
-} from './schema'; // ton barrel schema.ts qui export tout
+} from './schema';
+
+function generatePublicToken(): string {
+  return randomBytes(16).toString('hex');
+}
 
 async function main() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -20,8 +25,6 @@ async function main() {
   const pool = new Pool({ connectionString: databaseUrl });
   const db = drizzle(pool);
 
-  // Optionnel : reset en dev (attention, ça supprime TOUT)
-  // Si tu veux un seed "rejouable", c'est pratique.
   await db.delete(cocktailsCommandes);
   await db.delete(cocktailsIngredients);
   await db.delete(commandes);
@@ -59,9 +62,8 @@ async function main() {
 
   const c = Object.fromEntries(insertedCocktails.map((x) => [x.name, x]));
 
-  // 3) Cocktail <-> Ingredients (recettes)
+  // 3) Recettes cocktails
   await db.insert(cocktailsIngredients).values([
-    // Mojito
     {
       cocktailId: c['Mojito'].id,
       ingredientId: ing['Rhum blanc'].id,
@@ -93,7 +95,6 @@ async function main() {
       unity: 'cl',
     },
 
-    // Screwdriver
     {
       cocktailId: c['Screwdriver'].id,
       ingredientId: ing['Vodka'].id,
@@ -107,7 +108,6 @@ async function main() {
       unity: 'cl',
     },
 
-    // Tequila Sunrise (sans tequila dans ta liste, tu peux l’ajouter)
     {
       cocktailId: c['Tequila Sunrise'].id,
       ingredientId: ing["Jus d'orange"].id,
@@ -122,13 +122,39 @@ async function main() {
     },
   ]);
 
-  // 4) Commandes
-  const insertedCommandes = await db
-    .insert(commandes)
-    .values([{ status: 'PENDING' }, { status: 'PAID' }])
+  // 4) Codes promo
+  const insertedCodes = await db
+    .insert(codes)
+    .values([{ code: 'GRANDOPENING' }])
     .returning();
 
-  // 5) Cocktails <-> Commandes (lignes de commande)
+  const promoCode = insertedCodes[0]?.code ?? 'GRANDOPENING';
+
+  // 5) Commandes
+  const commande1Total = c['Mojito'].price * 2 + c['Screwdriver'].price * 1; // 9*2 + 8 = 26
+  const commande2Total = c['Tequila Sunrise'].price * 1; // 9
+
+  const insertedCommandes = await db
+    .insert(commandes)
+    .values([
+      {
+        customerName: 'Alice Martin',
+        promoCode,
+        publicToken: generatePublicToken(),
+        totalPrice: commande1Total,
+        status: 'PENDING',
+      },
+      {
+        customerName: 'Bob Dupont',
+        promoCode,
+        publicToken: generatePublicToken(),
+        totalPrice: commande2Total,
+        status: 'READY',
+      },
+    ])
+    .returning();
+
+  // 6) Lignes de commande
   await db.insert(cocktailsCommandes).values([
     {
       commandeId: insertedCommandes[0].id,
@@ -147,10 +173,7 @@ async function main() {
     },
   ]);
 
-  // 6) Codes (exemple)
-  await db.insert(codes).values([{ code: 'GRANDOPENING' }]);
-
-  // Users
+  // 7) User admin
   const hashed = await bcrypt.hash('masterbarman', 10);
   await db.insert(users).values([
     {

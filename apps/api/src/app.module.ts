@@ -8,6 +8,7 @@ import { CodesModule } from './codes/codes.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CommandesModule } from './commandes/commandes.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AppService } from './app.service';
     CocktailsModule,
     CodesModule,
     IngredientsModule,
+    CommandesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

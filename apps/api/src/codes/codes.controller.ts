@@ -13,29 +13,31 @@ import { CreateCodeDto } from './dto/create-code.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { TypedBody, TypedParam, TypedRoute } from '@nestia/core';
+import { CodeRow } from 'domain/entities/code';
 
 @Controller('codes')
 export class CodesController {
   constructor(private readonly service: CodesService) {}
 
-  @Post()
+  @TypedRoute.Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  create(@Body() dto: CreateCodeDto) {
+  create(@TypedBody() dto: CreateCodeDto): Promise<CodeRow> {
     return this.service.create(dto.code);
   }
 
-  @Delete(':id')
+  @TypedRoute.Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  delete(@Param('id') id: string) {
+  delete(@TypedParam('id') id: string): Promise<CodeRow> {
     return this.service.deleteById(id);
   }
 
-  @Get()
+  @TypedRoute.Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  list() {
+  list(): Promise<CodeRow[]> {
     return this.service.list();
   }
 }

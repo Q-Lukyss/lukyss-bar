@@ -1,5 +1,5 @@
 {
-  "id": "84bfb266-3c33-4a0c-b73f-52ffca172d3c",
+  "id": "2a749d85-4b66-4d79-8efd-4cfa87d4173a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -266,6 +266,30 @@
           "primaryKey": true,
           "notNull": true
         },
+        "customer_name": {
+          "name": "customer_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "promo_code": {
+          "name": "promo_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "public_token": {
+          "name": "public_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_price": {
+          "name": "total_price",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -282,15 +306,25 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "commande_status",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'PENDING'"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "commandes_public_token_unique": {
+          "name": "commandes_public_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "public_token"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -313,7 +347,7 @@
         },
         "stock": {
           "name": "stock",
-          "type": "integer",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true
         },
@@ -348,6 +382,12 @@
           "name": "id",
           "type": "text",
           "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
           "notNull": true
         },
         "email": {
@@ -398,7 +438,19 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.commande_status": {
+      "name": "commande_status",
+      "schema": "public",
+      "values": [
+        "PENDING",
+        "CONFIRMED",
+        "IN_PREPARATION",
+        "READY",
+        "COMPLETED"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

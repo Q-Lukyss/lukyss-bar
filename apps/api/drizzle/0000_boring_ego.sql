@@ -1,3 +1,4 @@
+CREATE TYPE "public"."commande_status" AS ENUM('PENDING', 'CONFIRMED', 'IN_PREPARATION', 'READY', 'COMPLETED');--> statement-breakpoint
 CREATE TABLE "cocktails" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
@@ -35,21 +36,27 @@ CREATE TABLE "codes" (
 --> statement-breakpoint
 CREATE TABLE "commandes" (
 	"id" text PRIMARY KEY NOT NULL,
+	"customer_name" text NOT NULL,
+	"promo_code" text NOT NULL,
+	"public_token" text NOT NULL,
+	"total_price" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"status" text NOT NULL
+	"status" "commande_status" DEFAULT 'PENDING' NOT NULL,
+	CONSTRAINT "commandes_public_token_unique" UNIQUE("public_token")
 );
 --> statement-breakpoint
 CREATE TABLE "ingredients" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"stock" integer NOT NULL,
+	"stock" boolean NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
 	"id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
 	"email" text NOT NULL,
 	"password" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,

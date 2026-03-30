@@ -6,6 +6,7 @@ import { DB } from '../db/db.module';
 import { ingredients } from '../drizzle/schema';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
+import { IngredientRow } from 'domain/entities/ingredients';
 
 type Db = ReturnType<typeof drizzle>;
 
@@ -13,11 +14,11 @@ type Db = ReturnType<typeof drizzle>;
 export class IngredientsService {
   constructor(@Inject(DB) private readonly db: Db) {}
 
-  list() {
+  list(): Promise<IngredientRow[]> {
     return this.db.select().from(ingredients);
   }
 
-  async getById(id: string) {
+  async getById(id: string): Promise<IngredientRow> {
     const [row] = await this.db
       .select()
       .from(ingredients)
@@ -28,7 +29,7 @@ export class IngredientsService {
     return row;
   }
 
-  async create(dto: CreateIngredientDto) {
+  async create(dto: CreateIngredientDto): Promise<IngredientRow> {
     const [created] = await this.db
       .insert(ingredients)
       .values({
@@ -40,7 +41,7 @@ export class IngredientsService {
     return created;
   }
 
-  async update(id: string, dto: UpdateIngredientDto) {
+  async update(id: string, dto: UpdateIngredientDto): Promise<IngredientRow> {
     const patch: Record<string, any> = {};
     if (dto.name !== undefined) patch.name = dto.name.trim();
     if (dto.stock !== undefined) patch.stock = dto.stock;
@@ -55,7 +56,7 @@ export class IngredientsService {
     return updated;
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<IngredientRow> {
     const [deleted] = await this.db
       .delete(ingredients)
       .where(eq(ingredients.id, id))
@@ -65,11 +66,11 @@ export class IngredientsService {
     return deleted;
   }
 
-  async setInStock(id: string) {
+  async setInStock(id: string): Promise<IngredientRow> {
     return this.update(id, { stock: true });
   }
 
-  async setOutOfStock(id: string) {
+  async setOutOfStock(id: string): Promise<IngredientRow> {
     return this.update(id, { stock: false });
   }
 }

@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { NestiaSwaggerComposer } from '@nestia/sdk';
+import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import * as classTransformer from 'class-transformer';
+import * as classValidator from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,8 +14,24 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      validatorPackage: classValidator,
+      transformerPackage: classTransformer,
     }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  const port = Number(process.env.PORT ?? 3001);
+
+  const document = await NestiaSwaggerComposer.document(app, {
+    openapi: '3.1',
+    servers: [
+      {
+        url: `http://localhost:${port}`,
+        description: 'Local',
+      },
+    ],
+  });
+
+  SwaggerModule.setup('docs', app, document as OpenAPIObject);
+
+  await app.listen(port);
 }
 bootstrap();

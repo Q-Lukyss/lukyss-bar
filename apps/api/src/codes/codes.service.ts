@@ -5,6 +5,7 @@ import { randomBytes } from 'crypto';
 
 import { DB } from '../db/db.module';
 import { codes } from '../drizzle/schema';
+import { CodeRow } from 'domain/entities/code';
 
 type Db = ReturnType<typeof drizzle>;
 
@@ -24,11 +25,11 @@ export class CodesService {
     return input.trim().toUpperCase();
   }
 
-  async list() {
+  async list(): Promise<CodeRow[]> {
     return this.db.select().from(codes);
   }
 
-  async create(inputCode?: string) {
+  async create(inputCode?: string): Promise<CodeRow> {
     let codeValue = inputCode?.trim()
       ? this.normalizeCode(inputCode)
       : this.generateCode4();
@@ -52,7 +53,7 @@ export class CodesService {
     return created;
   }
 
-  async deleteById(id: string) {
+  async deleteById(id: string): Promise<CodeRow> {
     const [deleted] = await this.db
       .delete(codes)
       .where(eq(codes.id, id))
