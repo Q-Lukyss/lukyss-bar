@@ -56,10 +56,12 @@ npm -w @lukyss-bar/api run db:seed
 ### impératifs nest cours
 
 
-- Utiliser Nest, Nestia, Temps réel, SDK FrontEnd Nestia
+- Utiliser Nest, Nestia (avec swagger generator), Temps réel, SDK FrontEnd Nestia
 - Utiliser une abstraction supplémentaire pour nest -> les répository
 - utiliser la clean archi
 - neverthrow pour Monade ResultAsync
+- guard rate limite avec redis ?
+- integrer un module de la liste (liste sur discord) Pino pour log?
 - Mono repo sur LukyssBar
 
 ### fonctionnalités
