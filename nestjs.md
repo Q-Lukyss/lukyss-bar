@@ -1009,4 +1009,129 @@ GET /trpc/cocktails.getById?input={"id":"01JXXXXXXXXXXXXXXXX"}
 
 ---
 
+## 21. WebSocket — Suivi de commande en temps réel
+
+### Objectif
+
+Permettre à un client de suivre l'évolution du statut de sa commande en temps réel, sans polling. Quand un admin met à jour le statut via `PATCH /commandes/:id/status`, l'événement est immédiatement poussé vers le client connecté via socket.io.
+
+### Stack
+
+- **`@nestjs/websockets`** + **`@nestjs/platform-socket.io`** — intégration WebSocket NestJS
+- **`socket.io`** (serveur) + **`socket.io-client`** (frontend)
+
+### Structure
+
+```
+apps/api/src/commandes/
+├── commandes.gateway.ts   ← nouveau : WebSocket gateway
+├── commandes.service.ts   ← modifié : émet l'event après updateStatus
+└── commandes.module.ts    ← modifié : enregistre CommandesGateway
+```
+
+### 21.1 `CommandesGateway`
+
+```ts
+@WebSocketGateway({
+  cors: { origin: process.env.FRONTEND_URL ?? 'http://localhost:3000', credentials: true },
+})
+export class CommandesGateway {
+  @WebSocketServer()
+  server: Server;
+
+  @SubscribeMessage('join:commande')
+  handleJoin(@MessageBody() token: string, @ConnectedSocket() client: Socket) {
+    client.join(`commande:${token}`);
+  }
+
+  emitStatusUpdate(publicToken: string, status: string) {
+    this.server.to(`commande:${publicToken}`).emit('commande:status', { status });
+  }
+}
+```
+
+**Principe des rooms socket.io :** à la connexion, le client envoie `join:commande` avec le `publicToken` de sa commande. Le serveur l'ajoute à la room `commande:{token}`. Quand le statut change, seuls les clients de cette room reçoivent l'événement.
+
+### 21.2 Émission depuis `CommandesService`
+
+```ts
+async updateStatus(id: string, status: CommandeStatus): Promise<CommandeRow> {
+  const [updated] = await this.db
+    .update(commandes).set({ status }).where(eq(commandes.id, id)).returning();
+
+  if (!updated) throw new NotFoundException('Commande introuvable');
+
+  // Pousse le nouveau statut vers tous les clients qui suivent cette commande
+  this.gateway.emitStatusUpdate(updated.publicToken, updated.status);
+
+  return updated;
+}
+```
+
+Le gateway est injecté via le constructeur grâce au DI NestJS. Aucun couplage direct entre le contrôleur et le WebSocket.
+
+### 21.3 Enregistrement dans `CommandesModule`
+
+```ts
+@Module({
+  imports: [DbModule],
+  controllers: [CommandesController],
+  providers: [CommandesService, CommandesGateway],
+})
+export class CommandesModule {}
+```
+
+`CommandesGateway` est déclaré comme `provider` au même titre que le service. NestJS gère son cycle de vie et son injection automatiquement.
+
+### 21.4 Client Next.js (`/commandes/[token]`)
+
+```ts
+useEffect(() => {
+  const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001', {
+    transports: ['websocket'],
+  });
+
+  socket.on('connect', () => {
+    socket.emit('join:commande', token); // rejoint la room
+  });
+
+  socket.on('commande:status', ({ status }) => {
+    setData((prev) =>
+      prev ? { ...prev, commande: { ...prev.commande, status } } : prev
+    );
+  });
+
+  return () => socket.disconnect();
+}, [token]);
+```
+
+Le `fetchCommande()` initial (REST) charge l'état courant au montage. Ensuite socket.io prend le relais pour les mises à jour.
+
+### 21.5 Flux complet
+
+```
+Admin (PATCH /commandes/:id/status)
+  → CommandesController
+  → CommandesService.updateStatus()
+      → DB update
+      → CommandesGateway.emitStatusUpdate(publicToken, status)
+          → socket.io room "commande:{token}"
+              → Client web reçoit "commande:status"
+                  → React state mis à jour instantanément
+```
+
+### 21.6 CORS WebSocket
+
+Le gateway configure son propre CORS indépendamment du CORS HTTP déclaré dans `main.ts` :
+
+```ts
+@WebSocketGateway({
+  cors: { origin: process.env.FRONTEND_URL ?? 'http://localhost:3000', credentials: true },
+})
+```
+
+Les deux configurations (`app.enableCors()` pour HTTP et le décorateur `@WebSocketGateway` pour WS) doivent être cohérentes.
+
+---
+
 *Documentation générée depuis l'analyse du code source de `apps/api/`.*

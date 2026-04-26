@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { io } from "socket.io-client";
 import api from "@ORGANIZATION/PROJECT-api";
 import { getApiConnection } from "@/lib/api";
 
@@ -33,6 +34,7 @@ export default function CommandeTrackingPage({
   const { token } = use(params);
   const [data, setData] = useState<CommandeView | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [connected, setConnected] = useState(false);
 
   const fetchCommande = useCallback(async () => {
     try {
@@ -50,9 +52,33 @@ export default function CommandeTrackingPage({
 
   useEffect(() => {
     fetchCommande();
-    const interval = setInterval(fetchCommande, 5000);
-    return () => clearInterval(interval);
   }, [fetchCommande]);
+
+  useEffect(() => {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+    const socket = io(apiUrl, { transports: ["websocket"] });
+
+    socket.on("connect", () => {
+      setConnected(true);
+      socket.emit("join:commande", token);
+    });
+
+    socket.on("disconnect", () => setConnected(false));
+
+    socket.on("commande:status", ({ status }: { status: string }) => {
+      setData((prev) =>
+        prev
+          ? { ...prev, commande: { ...prev.commande, status: status as CommandeView["commande"]["status"] } }
+          : prev,
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [token]);
 
   if (error) {
     return (
@@ -90,8 +116,17 @@ export default function CommandeTrackingPage({
           <h1 className="font-monoton text-2xl text-amber-500">
             Suivi de commande
           </h1>
-          <p className="mt-1 font-playfair text-sm text-stone-500">
-            {commande.customerName} · mise à jour toutes les 5 s
+          <p className="mt-1 flex items-center gap-2 font-playfair text-sm text-stone-500">
+            {commande.customerName}
+            <span
+              className={`inline-block h-2 w-2 rounded-full ${
+                connected ? "bg-green-500" : "bg-stone-600"
+              }`}
+              title={connected ? "Connecté en temps réel" : "Déconnecté"}
+            />
+            <span className="text-xs">
+              {connected ? "temps réel" : "reconnexion..."}
+            </span>
           </p>
         </div>
 
@@ -103,7 +138,7 @@ export default function CommandeTrackingPage({
               return (
                 <li key={status} className="flex items-center gap-3">
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                    className={`flex h-4 w-4 shrink-0 rounded-full transition-all duration-500 ${
                       isCurrent
                         ? "bg-amber-500 ring-4 ring-amber-500/25"
                         : isPast
@@ -112,7 +147,7 @@ export default function CommandeTrackingPage({
                     }`}
                   />
                   <span
-                    className={`font-playfair text-sm ${
+                    className={`font-playfair text-sm transition-colors duration-300 ${
                       isCurrent
                         ? "font-semibold text-amber-400"
                         : isPast

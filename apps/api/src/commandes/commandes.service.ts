@@ -21,12 +21,16 @@ import type {
   CommandeView,
   CommandeStatus,
 } from '../../domain/entities/commandes';
+import { CommandesGateway } from './commandes.gateway';
 
 type Db = ReturnType<typeof drizzle>;
 
 @Injectable()
 export class CommandesService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    private readonly gateway: CommandesGateway,
+  ) {}
 
   private normalizeCode(input: string): string {
     return input.trim().toUpperCase();
@@ -168,6 +172,8 @@ export class CommandesService {
     if (!updated) {
       throw new NotFoundException('Commande introuvable');
     }
+
+    this.gateway.emitStatusUpdate(updated.publicToken, updated.status);
 
     return updated;
   }
