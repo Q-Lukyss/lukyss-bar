@@ -5,7 +5,14 @@ import { getApiConnection } from "@/lib/api";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { CartButton } from "@/components/cart-button";
-import Image from "next/image";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+function imageUrl(path: string | null): string | null {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return `${API_URL}${path}`;
+}
 
 type CocktailItem = Awaited<
   ReturnType<typeof api.functional.cocktails.list>
@@ -29,8 +36,8 @@ function CocktailCard({ cocktail }: { cocktail: CocktailItem }) {
         </span>
       </div>
       {cocktail.image && (
-        <Image
-          src={cocktail.image}
+        <img
+          src={imageUrl(cocktail.image)!}
           alt={cocktail.name}
           className="h-40 w-full rounded-xl object-cover"
         />

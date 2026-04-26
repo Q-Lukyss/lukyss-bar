@@ -5,6 +5,10 @@ import type { IConnection } from "@nestia/fetcher";
 import api from "@ORGANIZATION/PROJECT-api";
 import { getApiConnection } from "@/lib/api";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const imageUrl = (p: string | null) =>
+  !p ? null : p.startsWith("http") ? p : `${API_URL}${p}`;
+
 type CocktailRow = Awaited<ReturnType<typeof api.functional.cocktails.list>>[number];
 
 function authConnection(jwt: string): IConnection {
@@ -183,7 +187,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
               className="rounded-xl border border-amber-800/30 bg-stone-900 p-5 flex items-center gap-4"
             >
               {c.image && (
-                <img src={c.image} alt={c.name} className="h-12 w-12 rounded-lg object-cover shrink-0" />
+                <img src={imageUrl(c.image)!} alt={c.name} className="h-12 w-12 rounded-lg object-cover shrink-0" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-cinzel font-bold text-amber-400 truncate">{c.name}</p>

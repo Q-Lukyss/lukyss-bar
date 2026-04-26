@@ -4,6 +4,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+function imageUrl(path: string | null): string | null {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return `${API_URL}${path}`;
+}
+
 type CocktailDetail = Awaited<
   ReturnType<typeof api.functional.cocktails.getById>
 >;
@@ -58,7 +66,7 @@ export default async function CocktailDetailPage({
 
           {cocktail.image && (
             <img
-              src={cocktail.image}
+              src={imageUrl(cocktail.image)!}
               alt={cocktail.name}
               className="h-56 w-full rounded-xl object-cover"
             />
