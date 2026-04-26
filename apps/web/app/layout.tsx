@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { monoton, cinzel, playfair } from "./font";
+import { ConvexClientProvider } from "../components/convex-provider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +18,9 @@ export default function RootLayout({
       lang="fr"
       className={`${monoton.variable} ${cinzel.variable} ${playfair.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <ConvexClientProvider>{children}</ConvexClientProvider>
+      </body>
     </html>
   );
 }
