@@ -26,6 +26,8 @@
 18. [Diagramme entité-relation](#18-diagramme-entité-relation)
 19. [Récapitulatif des endpoints](#19-récapitulatif-des-endpoints)
 20. [Module tRPC (POC)](#20-module-trpc-poc)
+21. [WebSocket — Suivi de commande en temps réel](#21-websocket--suivi-de-commande-en-temps-réel)
+22. [Convex — Notifications temps réel (POC)](#22-convex--notifications-temps-réel-poc)
 
 ---
 
@@ -1131,6 +1133,143 @@ Le gateway configure son propre CORS indépendamment du CORS HTTP déclaré dans
 ```
 
 Les deux configurations (`app.enableCors()` pour HTTP et le décorateur `@WebSocketGateway` pour WS) doivent être cohérentes.
+
+---
+
+## 22. Convex — Notifications temps réel (POC)
+
+### Objectif
+
+Démontrer qu'une feature temps réel peut être branchée **directement sur le frontend**, sans passer par l'API NestJS, en utilisant [Convex](https://convex.dev) en self-hosted (Docker). Les notifications se propagent instantanément à tous les clients sans polling ni WebSocket manuel.
+
+### Infrastructure
+
+Convex tourne en local via Docker Compose (`convex.yml`) :
+
+- **Backend** : `ghcr.io/get-convex/convex-backend:latest` → port `3210`
+- **Dashboard** : `ghcr.io/get-convex/convex-dashboard:latest` → port `6791`
+- **Stockage** : volume Docker `data:/convex/data`
+
+```bash
+docker compose -f convex.yml up -d
+```
+
+> **Attention** : ne pas mettre `DATABASE_URL` avec un nom de base dans l'URL (`/lukyssbar`). Convex gère sa propre base — passer `DATABASE_URL=` (vide) dans `convex.yml` pour éviter le conflit avec le `.env` racine.
+
+Pour synchroniser le schéma et les fonctions sur l'instance locale :
+
+```bash
+npx convex dev --url http://localhost:3210
+```
+
+### Structure
+
+```
+convex/
+├── schema.ts          # Définition de la table notifications
+├── notifications.ts   # Query + mutations
+└── _generated/        # Auto-généré par convex dev
+    ├── api.d.ts
+    ├── api.js
+    ├── dataModel.d.ts
+    ├── server.d.ts
+    └── server.js
+```
+
+### 22.1 `convex/schema.ts` — Schéma
+
+```ts
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export default defineSchema({
+  notifications: defineTable({
+    message: v.string(),
+    type: v.union(v.literal("info"), v.literal("success"), v.literal("error")),
+    read: v.boolean(),
+  }).index("by_read", ["read"]),
+});
+```
+
+### 22.2 `convex/notifications.ts` — Fonctions
+
+```ts
+export const list = query({
+  args: {},
+  handler: async (ctx) =>
+    await ctx.db.query("notifications").order("desc").collect(),
+});
+
+export const add = mutation({
+  args: { message: v.string(), type: v.union(...) },
+  handler: async (ctx, { message, type }) =>
+    await ctx.db.insert("notifications", { message, type, read: false }),
+});
+
+export const markRead = mutation({
+  args: { id: v.id("notifications") },
+  handler: async (ctx, { id }) => ctx.db.patch(id, { read: true }),
+});
+
+export const remove = mutation({
+  args: { id: v.id("notifications") },
+  handler: async (ctx, { id }) => ctx.db.delete(id),
+});
+```
+
+### 22.3 Intégration Next.js (`apps/web`)
+
+**Dépendance** : `convex` ajoutée dans `apps/web/package.json`.
+
+**Alias tsconfig** (`apps/web/tsconfig.json`) pour résoudre les fichiers générés hors du projet Next :
+
+```json
+"paths": {
+  "@/*": ["./*"],
+  "@convex/*": ["../../convex/*"]
+}
+```
+
+Turbopack (Next.js 16) résout automatiquement les alias tsconfig — aucune configuration `webpack` nécessaire.
+
+**Provider** (`apps/web/components/convex-provider.tsx`) :
+
+```tsx
+"use client";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+
+const convex = new ConvexReactClient(
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? "http://localhost:3210"
+);
+
+export function ConvexClientProvider({ children }: { children: React.ReactNode }) {
+  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
+}
+```
+
+Wrappé dans `apps/web/app/layout.tsx` autour de `{children}`.
+
+### 22.4 Page POC (`/notifications`)
+
+```tsx
+const notifications = useQuery(api.notifications.list);  // temps réel automatique
+const add           = useMutation(api.notifications.add);
+const markRead      = useMutation(api.notifications.markRead);
+const remove        = useMutation(api.notifications.remove);
+```
+
+`useQuery` de Convex maintient une connexion live : tout insert/update déclenche un re-render immédiat sur tous les clients connectés, sans polling.
+
+### 22.5 Différences avec Socket.io (section 21)
+
+| | WebSocket (Socket.io) | Convex |
+|---|---|---|
+| Infra | Géré dans NestJS | Backend séparé (Docker) |
+| Côté serveur | `CommandesGateway` + rooms | Fonctions `query` / `mutation` |
+| Côté client | `io()` + listeners manuels | `useQuery` / `useMutation` |
+| Persistance | Non (événements éphémères) | Oui (base de données intégrée) |
+| Temps réel | Push manuel (`emit`) | Réactif automatique |
+| Cas d'usage ici | Suivi statut commande | Notifications persistantes |
 
 ---
 
