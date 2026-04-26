@@ -5,6 +5,7 @@ import { getApiConnection } from "@/lib/api";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { CartButton } from "@/components/cart-button";
+import Image from "next/image";
 
 type CocktailItem = Awaited<
   ReturnType<typeof api.functional.cocktails.list>
@@ -28,7 +29,7 @@ function CocktailCard({ cocktail }: { cocktail: CocktailItem }) {
         </span>
       </div>
       {cocktail.image && (
-        <img
+        <Image
           src={cocktail.image}
           alt={cocktail.name}
           className="h-40 w-full rounded-xl object-cover"
@@ -50,7 +51,8 @@ export default async function HomePage() {
   try {
     cocktails = await getCocktails();
   } catch {
-    error = "Impossible de contacter l'API. Vérifiez que le serveur est démarré sur le port 3001.";
+    error =
+      "Impossible de contacter l'API. Vérifiez que le serveur est démarré sur le port 3001.";
   }
 
   return (

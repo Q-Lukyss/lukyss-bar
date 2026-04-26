@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Param,
-  Post,
-  Get,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 
 import { CodesService } from './codes.service';
 import { CreateCodeDto } from './dto/create-code.dto';
