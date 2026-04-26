@@ -177,7 +177,7 @@ export default function CommandeTrackingPage({
                   {item.cocktailName} ×{item.quantity}
                 </span>
                 <span className="text-stone-500">
-                  {(item.lineTotal / 100).toFixed(2)} €
+                  {item.lineTotal.toFixed(2)} €
                 </span>
               </li>
             ))}
@@ -185,7 +185,7 @@ export default function CommandeTrackingPage({
           <div className="border-t border-stone-800 pt-3 flex justify-between font-playfair text-sm">
             <span className="text-stone-400">Total</span>
             <span className="font-semibold text-amber-400">
-              {(commande.totalPrice / 100).toFixed(2)} €
+              {commande.totalPrice.toFixed(2)} €
             </span>
           </div>
         </div>

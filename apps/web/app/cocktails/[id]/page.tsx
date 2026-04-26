@@ -26,7 +26,7 @@ export default async function CocktailDetailPage({
     notFound();
   }
 
-  const price = (cocktail.price / 100).toFixed(2);
+  const price = cocktail.price.toFixed(2);
 
   return (
     <main className="min-h-screen bg-stone-950 px-6 py-12">

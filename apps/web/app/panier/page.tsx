@@ -90,7 +90,7 @@ export default function PanierPage() {
                       </p>
                       <p className="font-playfair text-xs text-stone-500">
                         x{item.quantity} —{" "}
-                        {((item.price * item.quantity) / 100).toFixed(2)} €
+                        {(item.price * item.quantity).toFixed(2)} €
                       </p>
                     </div>
                     <button
@@ -106,7 +106,7 @@ export default function PanierPage() {
               <div className="border-t border-stone-800 pt-3 flex justify-between font-playfair text-sm">
                 <span className="text-stone-400">Total estimé</span>
                 <span className="font-semibold text-amber-400">
-                  {(total / 100).toFixed(2)} €
+                  {total.toFixed(2)} €
                 </span>
               </div>
             </div>

@@ -4,6 +4,7 @@ import api from "@ORGANIZATION/PROJECT-api";
 import { getApiConnection } from "@/lib/api";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { CartButton } from "@/components/cart-button";
 
 type CocktailItem = Awaited<
   ReturnType<typeof api.functional.cocktails.list>
@@ -59,15 +60,18 @@ export default async function CocktailsPage() {
   return (
     <main className="min-h-screen bg-stone-950 px-6 py-12">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-10 flex flex-col gap-2">
-          <h1 className="font-monoton text-3xl text-amber-500">Cocktails</h1>
-          <p className="font-playfair text-stone-400">
-            Liste récupérée via le{" "}
-            <span className="text-amber-400">SDK Nestia</span> —{" "}
-            <code className="rounded bg-stone-800 px-1 py-0.5 text-xs text-stone-300">
-              api.functional.cocktails.list()
-            </code>
-          </p>
+        <div className="mb-10 flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="font-monoton text-3xl text-amber-500">Cocktails</h1>
+            <p className="font-playfair text-stone-400">
+              Liste récupérée via le{" "}
+              <span className="text-amber-400">SDK Nestia</span> —{" "}
+              <code className="rounded bg-stone-800 px-1 py-0.5 text-xs text-stone-300">
+                api.functional.cocktails.list()
+              </code>
+            </p>
+          </div>
+          <CartButton />
         </div>
 
         {error && (

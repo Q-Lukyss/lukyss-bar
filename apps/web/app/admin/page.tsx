@@ -209,7 +209,7 @@ export default function AdminPage() {
                 )}
               </div>
               <span className="shrink-0 rounded-full bg-amber-600/20 px-3 py-1 font-playfair text-xs text-amber-300">
-                {(cmd.totalPrice / 100).toFixed(2)} €
+                {cmd.totalPrice.toFixed(2)} €
               </span>
             </div>
 
