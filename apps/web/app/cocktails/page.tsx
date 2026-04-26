@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic";
 
 import api from "@ORGANIZATION/PROJECT-api";
 import { getApiConnection } from "@/lib/api";
+import Link from "next/link";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 
 type CocktailItem = Awaited<
   ReturnType<typeof api.functional.cocktails.list>
@@ -18,9 +20,11 @@ function CocktailCard({ cocktail }: { cocktail: CocktailItem }) {
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-amber-800/30 bg-stone-900 p-6 transition-colors hover:border-amber-600/60">
       <div className="flex items-start justify-between gap-2">
-        <h2 className="font-cinzel text-lg font-bold text-amber-400">
-          {cocktail.name}
-        </h2>
+        <Link href={`/cocktails/${cocktail.id}`}>
+          <h2 className="font-cinzel text-lg font-bold text-amber-400 transition-colors hover:text-amber-300">
+            {cocktail.name}
+          </h2>
+        </Link>
         <span className="shrink-0 rounded-full bg-amber-600/20 px-3 py-1 font-playfair text-sm font-semibold text-amber-300">
           {price} €
         </span>
@@ -32,10 +36,11 @@ function CocktailCard({ cocktail }: { cocktail: CocktailItem }) {
           className="h-40 w-full rounded-xl object-cover"
         />
       )}
-      <p className="font-playfair text-sm text-stone-400">
-        ID :{" "}
-        <span className="font-mono text-xs text-stone-500">{cocktail.id}</span>
-      </p>
+      <AddToCartButton
+        cocktailId={cocktail.id}
+        name={cocktail.name}
+        price={cocktail.price}
+      />
     </div>
   );
 }
