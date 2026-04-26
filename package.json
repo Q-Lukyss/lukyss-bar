@@ -24,6 +24,8 @@
   ],
   "dependencies": {
     "@nestjs/platform-express": "^11.1.17",
-    "@nestjs/serve-static": "^5.0.4"
+    "@nestjs/serve-static": "^5.0.4",
+    "@trpc/server": "^11.16.0",
+    "zod": "^4.3.6"
   }
 }
