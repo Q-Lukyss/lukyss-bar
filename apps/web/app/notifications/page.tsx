@@ -47,15 +47,13 @@ export default function NotificationsPage() {
   return (
     <main className="min-h-screen bg-stone-950 px-6 py-12">
       <div className="mx-auto max-w-2xl flex flex-col gap-8">
-
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="font-monoton text-3xl text-amber-500">
               Notifications
             </h1>
             <p className="font-playfair text-sm text-stone-400">
-              Temps réel via{" "}
-              <span className="text-amber-400">Convex</span>{" "}
+              Temps réel via <span className="text-amber-400">Convex</span>{" "}
               <span className="text-stone-600">— POC</span>
             </p>
           </div>
@@ -124,7 +122,7 @@ export default function NotificationsPage() {
                 >
                   {TYPE_LABELS[n.type]}
                 </span>
-                <p className="font-playfair text-sm text-stone-200 break-words">
+                <p className="font-playfair text-sm text-stone-200 wrap-break-words">
                   {n.message}
                 </p>
               </div>
