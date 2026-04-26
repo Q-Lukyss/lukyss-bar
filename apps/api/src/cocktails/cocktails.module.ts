@@ -8,5 +8,6 @@ import { CocktailImagesService } from './cocktails-images.service';
   imports: [DbModule],
   controllers: [CocktailsController],
   providers: [CocktailsService, CocktailImagesService],
+  exports: [CocktailsService],
 })
 export class CocktailsModule {}
