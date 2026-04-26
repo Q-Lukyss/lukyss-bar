@@ -1,45 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import type { IConnection } from "@nestia/fetcher";
+import Link from "next/link";
 import api from "@ORGANIZATION/PROJECT-api";
 import { getApiConnection } from "@/lib/api";
+import { CommandesTab } from "./_components/commandes-tab";
+import { CocktailsTab } from "./_components/cocktails-tab";
+import { IngredientsTab } from "./_components/ingredients-tab";
+import { CodesTab } from "./_components/codes-tab";
 
-type CommandeRow = Awaited<
-  ReturnType<typeof api.functional.commandes.listAll>
->[number];
+type Tab = "commandes" | "cocktails" | "ingredients" | "codes";
 
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "En attente",
-  CONFIRMED: "Confirmée",
-  IN_PREPARATION: "En préparation",
-  READY: "Prête",
-  COMPLETED: "Terminée",
-};
-
-const STATUS_OPTIONS = Object.keys(STATUS_LABELS) as Array<
-  keyof typeof STATUS_LABELS
->;
-
-function authConnection(jwt: string): IConnection {
-  return {
-    ...getApiConnection(),
-    headers: { Authorization: `Bearer ${jwt}` },
-  };
-}
+const TABS: { id: Tab; label: string }[] = [
+  { id: "commandes", label: "Commandes" },
+  { id: "cocktails", label: "Cocktails" },
+  { id: "ingredients", label: "Ingrédients" },
+  { id: "codes", label: "Codes promo" },
+];
 
 export default function AdminPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [jwt, setJwt] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("commandes");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-
-  const [commandes, setCommandes] = useState<CommandeRow[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [updating, setUpdating] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +39,6 @@ export default function AdminPage() {
       });
       setJwt(result.access_token);
       setUserName(result.user.name);
-      loadCommandes(result.access_token);
     } catch {
       setLoginError("Email ou mot de passe incorrect.");
     } finally {
@@ -60,48 +46,22 @@ export default function AdminPage() {
     }
   };
 
-  const loadCommandes = async (token?: string) => {
-    const t = token ?? jwt;
-    if (!t) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await api.functional.commandes.listAll(authConnection(t));
-      setCommandes(result);
-    } catch {
-      setError("Erreur lors du chargement des commandes.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateStatus = async (id: string, status: string) => {
-    if (!jwt) return;
-    setUpdating(id);
-    try {
-      await api.functional.commandes.status.updateStatus(
-        authConnection(jwt),
-        id,
-        { status: status as CommandeRow["status"] },
-      );
-      await loadCommandes();
-    } catch {
-      setError("Erreur lors de la mise à jour.");
-    } finally {
-      setUpdating(null);
-    }
-  };
-
   if (!jwt) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-stone-950 px-6">
         <div className="w-full max-w-sm">
-          <h1 className="mb-8 font-monoton text-3xl text-amber-500">Admin</h1>
+          <div className="mb-8 flex items-center justify-between">
+            <h1 className="font-monoton text-3xl text-amber-500">Admin</h1>
+            <Link
+              href="/"
+              className="font-playfair text-sm text-stone-500 transition-colors hover:text-amber-400"
+            >
+              ← Accueil
+            </Link>
+          </div>
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label className="font-playfair text-sm text-stone-400">
-                Email
-              </label>
+              <label className="font-playfair text-sm text-stone-400">Email</label>
               <input
                 type="email"
                 value={email}
@@ -113,9 +73,7 @@ export default function AdminPage() {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="font-playfair text-sm text-stone-400">
-                Mot de passe
-              </label>
+              <label className="font-playfair text-sm text-stone-400">Mot de passe</label>
               <input
                 type="password"
                 value={password}
@@ -125,11 +83,9 @@ export default function AdminPage() {
                 className="rounded-lg bg-stone-800 px-4 py-2.5 font-playfair text-stone-100 outline-none focus:ring-1 focus:ring-amber-600"
               />
             </div>
-
             {loginError && (
               <p className="font-playfair text-sm text-red-400">{loginError}</p>
             )}
-
             <button
               type="submit"
               disabled={loginLoading}
@@ -149,16 +105,15 @@ export default function AdminPage() {
         <div className="flex items-center justify-between">
           <h1 className="font-monoton text-3xl text-amber-500">Admin</h1>
           <div className="flex items-center gap-4">
-            <span className="font-playfair text-sm text-stone-400">
-              {userName}
-            </span>
+            <span className="font-playfair text-sm text-stone-400">{userName}</span>
+            <Link
+              href="/"
+              className="font-playfair text-xs text-stone-500 transition-colors hover:text-amber-400"
+            >
+              Accueil
+            </Link>
             <button
-              onClick={() => {
-                setJwt(null);
-                setCommandes(null);
-                setEmail("");
-                setPassword("");
-              }}
+              onClick={() => { setJwt(null); setEmail(""); setPassword(""); }}
               className="font-playfair text-xs text-stone-600 transition-colors hover:text-red-400"
             >
               Déconnexion
@@ -166,77 +121,26 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          {commandes !== null && (
-            <p className="font-playfair text-sm text-stone-500">
-              {commandes.length} commande{commandes.length > 1 ? "s" : ""}
-            </p>
-          )}
-          <button
-            onClick={() => loadCommandes()}
-            disabled={loading}
-            className="ml-auto rounded-lg border border-amber-800/40 px-4 py-1.5 font-playfair text-sm text-amber-400 transition-colors hover:border-amber-600 disabled:opacity-50"
-          >
-            {loading ? "Chargement..." : "Rafraîchir"}
-          </button>
+        <div className="flex border-b border-stone-800">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2.5 font-cinzel text-xs font-semibold uppercase tracking-wider transition-colors ${
+                activeTab === tab.id
+                  ? "border-b-2 border-amber-500 text-amber-400"
+                  : "text-stone-500 hover:text-stone-300"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {error && (
-          <div className="rounded-xl border border-red-800/50 bg-red-950/40 p-4 font-playfair text-sm text-red-300">
-            {error}
-          </div>
-        )}
-
-        {commandes?.length === 0 && (
-          <p className="font-playfair text-stone-600">Aucune commande.</p>
-        )}
-
-        {commandes?.map((cmd) => (
-          <div
-            key={cmd.id}
-            className="rounded-xl border border-amber-800/30 bg-stone-900 p-5 flex flex-col gap-3"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-cinzel font-bold text-amber-400">
-                  {cmd.customerName}
-                </p>
-                <p className="font-mono text-xs text-stone-600">{cmd.id}</p>
-                {cmd.promoCode && (
-                  <p className="font-playfair text-xs text-stone-500">
-                    Code : {cmd.promoCode}
-                  </p>
-                )}
-              </div>
-              <span className="shrink-0 rounded-full bg-amber-600/20 px-3 py-1 font-playfair text-xs text-amber-300">
-                {cmd.totalPrice.toFixed(2)} €
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="font-playfair text-sm text-stone-400">
-                Statut :
-              </span>
-              <select
-                value={cmd.status}
-                disabled={updating === cmd.id}
-                onChange={(e) => updateStatus(cmd.id, e.target.value)}
-                className="rounded-lg bg-stone-800 px-3 py-1.5 font-playfair text-sm text-stone-100 outline-none focus:ring-1 focus:ring-amber-600 disabled:opacity-50"
-              >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {STATUS_LABELS[s]}
-                  </option>
-                ))}
-              </select>
-              {updating === cmd.id && (
-                <span className="animate-pulse font-playfair text-xs text-stone-500">
-                  Mise à jour...
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+        {activeTab === "commandes" && <CommandesTab jwt={jwt} />}
+        {activeTab === "cocktails" && <CocktailsTab jwt={jwt} />}
+        {activeTab === "ingredients" && <IngredientsTab jwt={jwt} />}
+        {activeTab === "codes" && <CodesTab jwt={jwt} />}
       </div>
     </main>
   );

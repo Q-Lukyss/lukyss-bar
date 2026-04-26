@@ -33,7 +33,7 @@ export default async function CocktailDetailPage({
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex items-center justify-between">
           <Link
-            href="/cocktails"
+            href="/"
             className="font-playfair text-sm text-stone-400 transition-colors hover:text-amber-400"
           >
             ← Retour
