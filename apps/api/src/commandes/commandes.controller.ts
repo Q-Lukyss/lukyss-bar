@@ -39,6 +39,13 @@ export class CommandesController {
     return this.service.getById(id);
   }
 
+  @TypedRoute.Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  delete(@TypedParam('id') id: string): Promise<{ message: string }> {
+    return this.service.delete(id);
+  }
+
   @TypedRoute.Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')

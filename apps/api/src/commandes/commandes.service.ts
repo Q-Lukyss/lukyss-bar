@@ -162,6 +162,26 @@ export class CommandesService {
     return this.db.select().from(commandes);
   }
 
+  async delete(id: string): Promise<{ message: string }> {
+    const [commande] = await this.db
+      .select()
+      .from(commandes)
+      .where(eq(commandes.id, id))
+      .limit(1);
+
+    if (!commande) {
+      throw new NotFoundException('Commande introuvable');
+    }
+
+    await this.db
+      .delete(cocktailsCommandes)
+      .where(eq(cocktailsCommandes.commandeId, id));
+
+    await this.db.delete(commandes).where(eq(commandes.id, id));
+
+    return { message: 'Commande supprimée' };
+  }
+
   async updateStatus(id: string, status: CommandeStatus): Promise<CommandeRow> {
     const [updated] = await this.db
       .update(commandes)

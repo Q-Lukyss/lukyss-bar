@@ -108,14 +108,19 @@ export function CocktailsSection({
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((cocktail) => (
-              <CocktailCard
+            {filtered.map((cocktail, index) => (
+              <div
                 key={cocktail.id}
-                cocktail={{
-                  ...cocktail,
-                  isOutOfStock: cocktail.ingredients.some((ing) => !ing.stock),
-                }}
-              />
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 60}ms` }}
+              >
+                <CocktailCard
+                  cocktail={{
+                    ...cocktail,
+                    isOutOfStock: cocktail.ingredients.some((ing) => !ing.stock),
+                  }}
+                />
+              </div>
             ))}
           </div>
         )}

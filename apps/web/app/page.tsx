@@ -1,6 +1,9 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import api from "@ORGANIZATION/PROJECT-api";
+
+export const metadata: Metadata = { title: "Accueil" };
 import { getApiConnection } from "@/lib/api";
 import { Nav } from "@/components/nav";
 import { HeroSection } from "@/components/hero-section";
