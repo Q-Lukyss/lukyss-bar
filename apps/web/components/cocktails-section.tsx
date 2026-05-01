@@ -57,8 +57,11 @@ export function CocktailsSection({
 
   const filtered = cocktails.filter(
     (c) =>
-      matchesFilter(c, activeFilter) &&
-      c.name.toLowerCase().includes(search.toLowerCase()),
+      (matchesFilter(c, activeFilter) &&
+        c.name.toLowerCase().includes(search.toLowerCase())) ||
+      c.ingredients.some((ing) =>
+        ing.name.toLowerCase().includes(search.toLowerCase()),
+      ),
   );
 
   return (
@@ -103,9 +106,7 @@ export function CocktailsSection({
         </div>
 
         {filtered.length === 0 ? (
-          <p className="font-playfair text-stone-400">
-            Aucun cocktail trouvé.
-          </p>
+          <p className="font-playfair text-stone-400">Aucun cocktail trouvé.</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((cocktail, index) => (
@@ -117,7 +118,9 @@ export function CocktailsSection({
                 <CocktailCard
                   cocktail={{
                     ...cocktail,
-                    isOutOfStock: cocktail.ingredients.some((ing) => !ing.stock),
+                    isOutOfStock: cocktail.ingredients.some(
+                      (ing) => !ing.stock,
+                    ),
                   }}
                 />
               </div>
