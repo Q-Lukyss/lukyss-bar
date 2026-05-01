@@ -8,6 +8,7 @@ export type CocktailWithIngredients = {
   name: string;
   image: string | null;
   price: number;
+  description: string | null;
   ingredients: {
     id: string;
     name: string;
@@ -77,7 +78,7 @@ export function CocktailsSection({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher un cocktail…"
-            className="w-full rounded-xl border border-amber-800/30 bg-stone-900 px-4 py-2.5 font-playfair text-sm text-stone-200 placeholder-stone-500 outline-none focus:border-amber-600/60"
+            className="w-full rounded-xl border border-amber-800/30 bg-stone-900 px-4 py-2.5 font-playfair text-sm text-stone-200 placeholder-stone-500 outline-none transition-colors focus:border-amber-600/60"
           />
 
           <div className="flex flex-wrap gap-2">
@@ -85,9 +86,9 @@ export function CocktailsSection({
               <button
                 key={filter.value}
                 onClick={() => setActiveFilter(filter.value)}
-                className={`rounded-full px-4 py-1.5 font-playfair text-sm transition-colors ${
+                className={`rounded-full px-4 py-1.5 font-playfair text-sm transition-all duration-200 ${
                   activeFilter === filter.value
-                    ? "bg-amber-600 font-semibold text-stone-950"
+                    ? "bg-amber-600 font-semibold text-stone-950 scale-105"
                     : "border border-amber-800/40 text-amber-400 hover:border-amber-600 hover:bg-amber-600/10"
                 }`}
               >
@@ -102,11 +103,19 @@ export function CocktailsSection({
         </div>
 
         {filtered.length === 0 ? (
-          <p className="font-playfair text-stone-400">Aucun cocktail trouvé.</p>
+          <p className="font-playfair text-stone-400">
+            Aucun cocktail trouvé.
+          </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((cocktail) => (
-              <CocktailCard key={cocktail.id} cocktail={cocktail} />
+              <CocktailCard
+                key={cocktail.id}
+                cocktail={{
+                  ...cocktail,
+                  isOutOfStock: cocktail.ingredients.some((ing) => !ing.stock),
+                }}
+              />
             ))}
           </div>
         )}

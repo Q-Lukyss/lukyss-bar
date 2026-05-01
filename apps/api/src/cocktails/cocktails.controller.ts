@@ -50,6 +50,7 @@ export class CocktailsController {
     return this.service.create({
       name: input.name,
       price: input.price,
+      description: input.description ?? null,
       image: imagePath,
     });
   }
@@ -69,6 +70,7 @@ export class CocktailsController {
     return this.service.update(id, {
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.price !== undefined ? { price: input.price } : {}),
+      ...(input.description !== undefined ? { description: input.description } : {}),
       ...(imagePath !== undefined ? { image: imagePath } : {}),
     });
   }

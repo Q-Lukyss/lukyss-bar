@@ -6,6 +6,7 @@ export const cocktails = pgTable('cocktails', {
     .primaryKey()
     .$defaultFn(() => ulid()),
   name: text('name').notNull(),
+  description: text('description'),
   image: text('image'),
   price: integer('price').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

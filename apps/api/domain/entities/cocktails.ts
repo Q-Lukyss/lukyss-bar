@@ -1,6 +1,7 @@
 export type CocktailRow = {
   id: string;
   name: string;
+  description: string | null;
   image: string | null;
   price: number;
   createdAt: Date;

@@ -33,6 +33,7 @@ export class CocktailsService {
     return rows.map((row) => ({
       id: row.id,
       name: row.name,
+      description: row.description ?? null,
       image: row.image,
       price: row.price,
       createdAt: row.createdAt,
@@ -72,6 +73,7 @@ export class CocktailsService {
     return {
       id: cocktail.id,
       name: cocktail.name,
+      description: cocktail.description ?? null,
       image: cocktail.image,
       price: cocktail.price,
       createdAt: cocktail.createdAt,
@@ -91,6 +93,7 @@ export class CocktailsService {
 
   async create(dto: {
     name: string;
+    description?: string | null;
     image?: string | null;
     price: number;
   }): Promise<CocktailRow> {
@@ -98,6 +101,7 @@ export class CocktailsService {
       .insert(cocktails)
       .values({
         name: dto.name,
+        description: dto.description ?? null,
         image: dto.image ?? null,
         price: dto.price,
       })
@@ -110,6 +114,7 @@ export class CocktailsService {
     return {
       id: created.id,
       name: created.name,
+      description: created.description ?? null,
       image: created.image,
       price: created.price,
       createdAt: created.createdAt,
@@ -119,7 +124,7 @@ export class CocktailsService {
 
   async update(
     id: string,
-    dto: { name?: string; image?: string | null; price?: number },
+    dto: { name?: string; description?: string | null; image?: string | null; price?: number },
   ): Promise<CocktailRow> {
     await this.ensureCocktailExists(id);
 
@@ -127,6 +132,7 @@ export class CocktailsService {
       .update(cocktails)
       .set({
         ...(dto.name !== undefined ? { name: dto.name } : {}),
+        ...(dto.description !== undefined ? { description: dto.description } : {}),
         ...(dto.price !== undefined ? { price: dto.price } : {}),
         ...(dto.image !== undefined ? { image: dto.image } : {}),
       })
@@ -140,6 +146,7 @@ export class CocktailsService {
     return {
       id: updated.id,
       name: updated.name,
+      description: updated.description ?? null,
       image: updated.image,
       price: updated.price,
       createdAt: updated.createdAt,
@@ -380,6 +387,7 @@ export class CocktailsService {
     return {
       id: cocktail.id,
       name: cocktail.name,
+      description: cocktail.description ?? null,
       image: cocktail.image,
       price: cocktail.price,
       createdAt: cocktail.createdAt,
