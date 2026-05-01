@@ -3,8 +3,10 @@ import api from "@ORGANIZATION/PROJECT-api";
 import { getApiConnection } from "@/lib/api";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { Footer } from "@/components/footer";
+import { stonePlaceholder } from "@/lib/blur";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -53,8 +55,8 @@ export default async function CocktailDetailPage({
   const isOutOfStock = cocktail.ingredients.some((ing) => !ing.stock);
 
   return (
-    <>
-      <main className="min-h-screen bg-stone-950 px-6 py-12">
+    <div className="flex min-h-screen flex-col bg-stone-950">
+      <main className="flex-1 px-6 py-12">
         <div className="mx-auto max-w-5xl">
           {/* Navigation */}
           <div className="mb-8 flex items-center justify-between animate-fade-in">
@@ -75,14 +77,17 @@ export default async function CocktailDetailPage({
           {/* Layout 2 colonnes */}
           <div className="grid items-start gap-8 md:grid-cols-2">
             {/* Colonne gauche : image */}
-            <div
-              className="animate-slide-in-left relative overflow-hidden rounded-2xl"
-            >
+            <div className="animate-slide-in-left relative h-64 overflow-hidden rounded-2xl md:h-[480px]">
               {cocktail.image ? (
-                <img
+                <Image
                   src={imageUrl(cocktail.image)!}
                   alt={cocktail.name}
-                  className="w-full object-cover md:h-[480px]"
+                  fill
+                  className="object-cover"
+                  placeholder="blur"
+                  blurDataURL={stonePlaceholder}
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               ) : (
                 <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-800/20 bg-stone-900 md:h-[480px]">
@@ -101,9 +106,7 @@ export default async function CocktailDetailPage({
             </div>
 
             {/* Colonne droite : infos */}
-            <div
-              className="animate-slide-in-right flex flex-col gap-6 rounded-2xl border border-amber-800/30 bg-stone-900 p-8"
-            >
+            <div className="animate-slide-in-right flex flex-col gap-6 rounded-2xl border border-amber-800/30 bg-stone-900 p-8">
               <div className="flex items-start justify-between gap-4">
                 <h1 className="font-cinzel text-3xl font-bold text-amber-400">
                   {cocktail.name}
@@ -162,6 +165,6 @@ export default async function CocktailDetailPage({
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

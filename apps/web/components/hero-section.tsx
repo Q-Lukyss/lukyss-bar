@@ -1,11 +1,22 @@
+import Image from "next/image";
+import { stonePlaceholder } from "@/lib/blur";
+
 export function HeroSection() {
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
       {/* Image de fond — cachée sur mobile */}
-      <div
-        className="absolute inset-0 hidden bg-cover bg-center bg-no-repeat md:block"
-        style={{ backgroundImage: "url('/bar-artdeco.jpg')" }}
-      />
+      <div className="absolute inset-0 hidden md:block">
+        <Image
+          src="/bar-artdeco.jpg"
+          alt=""
+          fill
+          className="object-cover object-center"
+          placeholder="blur"
+          blurDataURL={stonePlaceholder}
+          priority
+          sizes="100vw"
+        />
+      </div>
       {/* Overlay — solide sur mobile, transparent sur desktop */}
       <div className="absolute inset-0 bg-stone-950 md:bg-stone-950/60" />
 
@@ -42,12 +53,14 @@ export function HeroSection() {
 
       {/* Contenu animé */}
       <div className="relative z-10 flex flex-col items-center gap-6">
-        <h1
-          className="animate-slide-up font-monoton text-5xl text-amber-500 sm:text-6xl md:text-7xl"
-          style={{ animationDelay: "0ms" }}
-        >
-          Lukyss&apos;Bar
-        </h1>
+        <div style={{ animation: "pulse-zoom 4.5s ease-in-out 0.8s infinite alternate" }}>
+          <h1
+            className="animate-slide-up font-monoton text-5xl text-amber-500 sm:text-6xl md:text-7xl"
+            style={{ animationDelay: "0ms" }}
+          >
+            Lukyss&apos;Bar
+          </h1>
+        </div>
 
         <div
           className="animate-slide-up flex items-center gap-3"
@@ -58,13 +71,15 @@ export function HeroSection() {
           <div className="h-px w-16 bg-amber-700/60" />
         </div>
 
-        <p
-          className="animate-slide-up max-w-md font-playfair text-base italic text-stone-300 sm:text-lg"
-          style={{ animationDelay: "240ms" }}
-        >
-          &ldquo;Les cocktails sont à la soirée ce que les préliminaires sont à
-          l&apos;amour.&rdquo;
-        </p>
+        <div style={{ animation: "pulse-zoom-subtle 6s ease-in-out 1.2s infinite alternate" }}>
+          <p
+            className="animate-slide-up max-w-md font-playfair text-base italic text-stone-300 sm:text-lg"
+            style={{ animationDelay: "240ms" }}
+          >
+            &ldquo;Les cocktails sont à la soirée ce que les préliminaires sont à
+            l&apos;amour.&rdquo;
+          </p>
+        </div>
 
         <a
           href="#cocktails"

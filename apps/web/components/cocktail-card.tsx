@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { stonePlaceholder } from "@/lib/blur";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -39,12 +41,16 @@ export function CocktailCard({ cocktail }: { cocktail: CocktailCardData }) {
         </span>
       </div>
 
-      <div className="relative overflow-hidden rounded-xl">
+      <div className="relative h-40 overflow-hidden rounded-xl">
         {cocktail.image && (
-          <img
+          <Image
             src={imageUrl(cocktail.image)!}
             alt={cocktail.name}
-            className="h-40 w-full object-cover transition-transform duration-500 hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-500 hover:scale-105"
+            placeholder="blur"
+            blurDataURL={stonePlaceholder}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         )}
         {outOfStock && (

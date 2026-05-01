@@ -30,7 +30,7 @@ export function Footer() {
                 href="/#cocktails"
                 className="font-playfair text-sm text-stone-400 transition-colors hover:text-amber-400"
               >
-                Notre Carte
+                La Carte
               </Link>
               <Link
                 href="/admin"

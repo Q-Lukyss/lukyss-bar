@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${monoton.variable} ${cinzel.variable} ${playfair.variable}`}
+      className={`scroll-smooth ${monoton.variable} ${cinzel.variable} ${playfair.variable}`}
     >
       <body>
         <ConvexClientProvider>{children}</ConvexClientProvider>
