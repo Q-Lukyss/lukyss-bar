@@ -80,7 +80,7 @@ export function CocktailsSection({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un cocktail…"
+            placeholder="Rechercher un cocktail ou ingrédient…"
             className="w-full rounded-xl border border-amber-800/30 bg-stone-900 px-4 py-2.5 font-playfair text-sm text-stone-200 placeholder-stone-500 outline-none transition-colors focus:border-amber-600/60"
           />
 
