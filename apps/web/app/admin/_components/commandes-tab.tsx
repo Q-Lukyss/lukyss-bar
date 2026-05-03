@@ -5,8 +5,6 @@ import type { IConnection } from "@nestia/fetcher";
 import api from "@ORGANIZATION/PROJECT-api";
 import { getApiConnection } from "@/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
 type CommandeRow = Awaited<
   ReturnType<typeof api.functional.commandes.listAll>
 >[number];
@@ -69,10 +67,7 @@ export function CommandesTab({ jwt }: { jwt: string }) {
     setDeleting(id);
     setError(null);
     try {
-      await fetch(`${API_URL}/commandes/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${jwt}` },
-      });
+      await api.functional.commandes._delete(authConnection(jwt), id);
       setConfirmDelete(null);
       await load();
     } catch {
