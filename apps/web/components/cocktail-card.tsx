@@ -2,14 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { stonePlaceholder } from "@/lib/blur";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
-function imageUrl(path: string | null): string | null {
-  if (!path) return null;
-  if (path.startsWith("http")) return path;
-  return `${API_URL}${path}`;
-}
+import { imageUrl } from "@/lib/image-url";
 
 export type CocktailCardData = {
   id: string;

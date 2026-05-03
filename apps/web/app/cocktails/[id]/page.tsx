@@ -7,14 +7,7 @@ import Image from "next/image";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { Footer } from "@/components/footer";
 import { stonePlaceholder } from "@/lib/blur";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
-function imageUrl(path: string | null): string | null {
-  if (!path) return null;
-  if (path.startsWith("http")) return path;
-  return `${API_URL}${path}`;
-}
+import { imageUrl } from "@/lib/image-url";
 
 type CocktailDetail = Awaited<
   ReturnType<typeof api.functional.cocktails.getById>

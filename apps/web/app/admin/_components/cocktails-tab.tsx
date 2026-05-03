@@ -7,9 +7,7 @@ import { getApiConnection } from "@/lib/api";
 import { CocktailForm, type CocktailFormData } from "./cocktail-form";
 import { CocktailIngredientManager } from "./cocktail-ingredient-manager";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-const imageUrl = (p: string | null) =>
-  !p ? null : p.startsWith("http") ? p : `${API_URL}${p}`;
+import { imageUrl } from "@/lib/image-url";
 
 type CocktailRow = Awaited<
   ReturnType<typeof api.functional.cocktails.list>

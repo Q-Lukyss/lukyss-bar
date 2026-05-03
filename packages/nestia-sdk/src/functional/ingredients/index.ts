@@ -6,7 +6,7 @@
 //================================================================
 import type { IConnection } from "@nestia/fetcher";
 import { PlainFetcher } from "@nestia/fetcher";
-import type { IngredientRow } from "../../../../../apps/api/domain/entities/ingredients";
+import type { IngredientRow } from "domain/entities/ingredients";
 import type { Primitive } from "typia";
 
 import type { CreateIngredientDto } from "../../../../../apps/api/src/ingredients/dto/create-ingredient.dto";

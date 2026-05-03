@@ -6,7 +6,7 @@
 //================================================================
 import type { IConnection } from "@nestia/fetcher";
 import { PlainFetcher } from "@nestia/fetcher";
-import type { CodeRow } from "../../../../../apps/api/domain/entities/code";
+import type { CodeRow } from "domain/entities/code";
 import type { Primitive } from "typia";
 
 import type { CreateCodeDto } from "../../../../../apps/api/src/codes/dto/create-code.dto";
