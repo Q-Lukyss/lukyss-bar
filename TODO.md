@@ -5,6 +5,3 @@
 3. **`remotePatterns` dans `next.config.js`** — le wildcard `https://**` fonctionne mais est permissif. À remplacer par le hostname exact de l'API prod une fois connu.
 
 
-## Important mais non bloquant
-
-7. Virer Convex

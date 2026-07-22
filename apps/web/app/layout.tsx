@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { monoton, cinzel, playfair } from "./font";
-import { ConvexClientProvider } from "../components/convex-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -21,9 +20,7 @@ export default function RootLayout({
       lang="fr"
       className={`scroll-smooth ${monoton.variable} ${cinzel.variable} ${playfair.variable}`}
     >
-      <body>
-        <ConvexClientProvider>{children}</ConvexClientProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

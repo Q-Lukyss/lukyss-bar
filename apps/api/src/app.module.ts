@@ -9,7 +9,6 @@ import { IngredientsModule } from './ingredients/ingredients.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CommandesModule } from './commandes/commandes.module';
-import { TrpcModule } from './trpc/trpc.module.js';
 
 @Module({
   imports: [
@@ -23,7 +22,6 @@ import { TrpcModule } from './trpc/trpc.module.js';
     CodesModule,
     IngredientsModule,
     CommandesModule,
-    TrpcModule,
   ],
   controllers: [AppController],
   providers: [AppService],
