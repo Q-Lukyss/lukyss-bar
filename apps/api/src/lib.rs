@@ -39,14 +39,17 @@ pub async fn run() -> anyhow::Result<()> {
         .connect(&config.database_url)
         .await?;
 
+    // Migrations embarquées dans le binaire à la compilation (macro `migrate!`)
+    // et appliquées au démarrage : pas de `sqlx-cli` ni d'étape séparée
+    // nécessaire en conteneur, juste `DATABASE_URL` pointant vers la prod.
+    sqlx::migrate!().run(&db).await?;
+
     let storage = R2Storage::new(
         &config.r2_account_id,
         &config.r2_access_key_id,
         &config.r2_secret_access_key,
         &config.r2_bucket_name,
     );
-
-    let cors = build_cors(&config.frontend_url)?;
 
     let state = AppState {
         db,
@@ -56,7 +59,23 @@ pub async fn run() -> anyhow::Result<()> {
         storage,
     };
 
-    let app = Router::new()
+    let app = build_router(state)?;
+
+    let listener = tokio::net::TcpListener::bind(("0.0.0.0", config.port)).await?;
+    tracing::info!("LukyssBar API (Rust) écoute sur le port {}", config.port);
+    tracing::info!("Documentation Swagger disponibles sur /docs");
+    axum::serve(listener, app).await?;
+
+    Ok(())
+}
+
+/// Construit le `Router` complet à partir d'un `AppState` déjà prêt — utilisé
+/// par `run()` ainsi que par les tests d'intégration (`tests/common`), qui
+/// montent l'app avec un pool/état de test sans passer par `main`/`Config`.
+pub fn build_router(state: AppState) -> anyhow::Result<Router> {
+    let cors = build_cors(&state.frontend_url)?;
+
+    Ok(Router::new()
         .route("/", get(routes::root))
         .route("/health", get(routes::health))
         .nest("/auth", auth::routes::router())
@@ -69,14 +88,7 @@ pub async fn run() -> anyhow::Result<()> {
         .layer(DefaultBodyLimit::max(6 * 1024 * 1024))
         .layer(cors)
         .layer(TraceLayer::new_for_http())
-        .with_state(state);
-
-    let listener = tokio::net::TcpListener::bind(("0.0.0.0", config.port)).await?;
-    tracing::info!("LukyssBar API (Rust) écoute sur le port {}", config.port);
-    tracing::info!("Documentation Swagger disponibles sur /docs");
-    axum::serve(listener, app).await?;
-
-    Ok(())
+        .with_state(state))
 }
 
 fn build_cors(frontend_url: &str) -> anyhow::Result<CorsLayer> {

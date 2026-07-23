@@ -8,7 +8,11 @@ use utoipa::ToSchema;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, sqlx::Type, TS, ToSchema)]
 #[sqlx(type_name = "commande_status", rename_all = "SCREAMING_SNAKE_CASE")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[ts(export, export_to = "commandes.ts", rename_all = "SCREAMING_SNAKE_CASE")]
+#[ts(
+    export,
+    export_to = "commandes.ts",
+    rename_all = "SCREAMING_SNAKE_CASE"
+)]
 pub enum CommandeStatus {
     Pending,
     Confirmed,

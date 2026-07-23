@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO cocktails_commandes (id, commande_id, cocktail_id, quantity) VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a78c84e9c8a29e98c755a949a9e57a5bd40a67d421ddb75eec6ee499e301a853"
+}

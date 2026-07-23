@@ -25,7 +25,8 @@ impl Config {
             .ok()
             .and_then(|p| p.parse().ok())
             .unwrap_or(3001);
-        let r2_account_id = env::var("R2_ACCOUNT_ID").context("R2_ACCOUNT_ID est manquant dans env")?;
+        let r2_account_id =
+            env::var("R2_ACCOUNT_ID").context("R2_ACCOUNT_ID est manquant dans env")?;
         let r2_access_key_id =
             env::var("R2_ACCESS_KEY_ID").context("R2_ACCESS_KEY_ID est manquant dans env")?;
         let r2_secret_access_key = env::var("R2_SECRET_ACCESS_KEY")

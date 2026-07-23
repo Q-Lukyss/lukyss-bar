@@ -1,0 +1,95 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT cc.id, cc.cocktail_id, cc.quantity, c.name as cocktail_name, c.image as cocktail_image,\n                  c.price as unit_price, (c.price * cc.quantity) as \"line_total!\"\n           FROM cocktails_commandes cc\n           INNER JOIN cocktails c ON c.id = cc.cocktail_id\n           WHERE cc.commande_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_commandes",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "cocktail_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_commandes",
+            "name": "cocktail_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "quantity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "cocktails_commandes",
+            "name": "quantity"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "cocktail_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "cocktail_image",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails",
+            "name": "image"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "unit_price",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "cocktails",
+            "name": "price"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "line_total!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "8249e3810bf6d7d81cbcf25284711f17bc4d1b1d19736e23799fa91d0bde1527"
+}

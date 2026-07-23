@@ -66,6 +66,7 @@ export function CocktailIngredientManager({
 
   useEffect(() => {
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadAll n'est pas mémoïsée, ne l'exécuter qu'au changement de cocktailId
   }, [cocktailId]);
 
   const handleAdd = async () => {

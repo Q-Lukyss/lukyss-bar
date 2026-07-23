@@ -1,0 +1,10 @@
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+apps/api/target
+apps/api/bindings
+.git
+.env
+**/.env
+out

@@ -39,7 +39,7 @@ pub async fn create(
 ) -> ApiResult<Json<CodeRow>> {
     if let Some(code) = &body.code {
         let len = code.trim().chars().count();
-        if len < 1 || len > 64 {
+        if !(1..=64).contains(&len) {
             return Err(ApiError::BadRequest(
                 "code must be longer than or equal to 1 and shorter than or equal to 64 characters"
                     .to_string(),
@@ -77,7 +77,10 @@ pub async fn delete_code(
     security(("bearer_auth" = [])),
     tag = "codes"
 )]
-pub async fn list(_admin: AdminUser, State(state): State<AppState>) -> ApiResult<Json<Vec<CodeRow>>> {
+pub async fn list(
+    _admin: AdminUser,
+    State(state): State<AppState>,
+) -> ApiResult<Json<Vec<CodeRow>>> {
     Ok(Json(repo::list(&state.db).await?))
 }
 

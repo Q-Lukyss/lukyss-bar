@@ -1,0 +1,7 @@
+{
+  "extends": "@lukyss-bar/typescript-config/base.json",
+  "compilerOptions": {
+    "types": ["vitest/globals"]
+  },
+  "include": ["src"]
+}

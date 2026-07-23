@@ -91,6 +91,81 @@ terminée, conservée pour référence historique).
 - sqlx pour accès db postgres
 - jsonwebtoken + bcrypt pour authentification
 
+## Tests
+
+### API Rust (`apps/api`)
+
+- **Unit tests** colocalisés (`#[cfg(test)] mod tests`) dans les modules à logique pure : `auth/jwt.rs`, `auth/password.rs`, `commandes/repo.rs` (`normalize_code`).
+- **Integration tests** dans `apps/api/tests/*.rs` : montent le `Router` complet (`lukyss_bar_api::build_router`) et envoient de vraies requêtes HTTP via `tower::ServiceExt::oneshot`, sans binder de port. Chaque test tourne sur une DB Postgres isolée créée/droppée automatiquement par `#[sqlx::test]` (nécessite juste un `DATABASE_URL` valide, cf. `docker-compose.yml`). Hors scope volontaire : l'upload réel d'image vers R2 (nécessiterait un mock S3 type MinIO) et le WebSocket au-delà d'une connexion basique.
+- `cargo test` (depuis `apps/api`, avec le Postgres de dev up) lance les deux.
+
+**Cache offline sqlx** (`apps/api/.sqlx/`) : sqlx vérifie normalement chaque requête `query!`/`query_as!` contre une vraie DB à la compilation. Ce cache (généré par `cargo sqlx prepare -- --all-targets`) permet de compiler avec `SQLX_OFFLINE=true` à la place — indispensable pour le build Docker de l'API (aucune DB disponible pendant `docker build`) et pour accélérer la CI. **À régénérer et committer après toute modification d'une requête SQL**, sinon le build Docker/CI utilisera un cache périmé.
+
+### Contrat web/mobile ↔ api (`packages/api-contract-tests`)
+
+Suite [vitest](https://vitest.dev/) qui utilise le client HTTP généré (`packages/api-types/src/client.ts`) — le même que consommera l'app mobile plus tard — contre une vraie instance de l'API + Postgres migrée/seedée (`cargo run --bin seed`). Vérifie que le JSON réellement renvoyé par l'API correspond aux types `ts-rs`, ce que les tests Rust ne peuvent pas détecter côté client. Couvre : login, parcours commande complet (calcul du total, code promo), diffusion du statut via WebSocket.
+
+```
+npm run test -w @lukyss-bar/api-contract-tests
+```
+
+(nécessite l'API lancée en local sur `API_URL`, par défaut `http://localhost:3001`)
+
+## CI/CD
+
+### CI (`.github/workflows/ci.yml`)
+
+Sur chaque PR et push (`main`, `dev`) :
+
+- `api-test` : `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test` (service Postgres GitHub Actions).
+- `api-types-drift` : régénère les bindings TS (`cargo run --bin export_types`) et échoue si `packages/api-types/generated` diffère de ce qui est committé — évite d'oublier de régénérer les types après avoir changé un type Rust.
+- `web-build` : lint + check-types + build de `web` et de ses dépendances internes.
+- `contract-tests` : démarre l'API (migrations auto au boot) + la seed, lance `packages/api-contract-tests`.
+- `docker-build` : construit les deux images Docker (sans les pousser) pour détecter une régression de `Dockerfile` avant qu'elle n'arrive en CD.
+
+### CD (`.github/workflows/cd.yml`)
+
+**api et web se versionnent et se déploient indépendamment** — jamais sur un simple push sur `main`, seulement sur un tag préfixé par le service concerné :
+
+```bash
+git tag api-v1.2.0 && git push origin api-v1.2.0   # ne build/déploie que l'API
+git tag web-v2.0.0 && git push origin web-v2.0.0   # ne build/déploie que le web
+```
+
+Chaque tag ne déclenche que le job du service correspondant (`build-and-push-api`/`deploy-api` ou `build-and-push-web`/`deploy-web`, filtrés par `startsWith(github.ref_name, 'api-v'|'web-v')`) : publier une nouvelle version de l'un ne touche jamais l'image ni le conteneur de l'autre. Chaque tag produit 3 images (`1.2.0`, `1.2`, `latest`) sur `ghcr.io/q-lukyss/lukyss-bar-{api,web}`. Le déploiement met à jour `IMAGE_TAG_API`/`IMAGE_TAG_WEB` directement dans le `.env` du serveur (pas juste en variable de commande) puis ne `pull`/`up -d` que le service concerné — un `docker compose up -d` manuel plus tard repart donc de la dernière version déployée, pas de `latest`.
+
+Secrets/variables GitHub requis (Settings → Secrets and variables → Actions) : voir `TODO.md`.
+
+## Déploiement (Docker)
+
+`docker-compose.prod.yml` (à copier sur le VPS avec un `.env` dérivé de `env.prod`, cf. `TODO.md`) démarre :
+
+- `postgres` — pas de port publié sur l'hôte (accès interne au réseau docker uniquement).
+- `api` — image `apps/api/Dockerfile` (multi-stage `cargo-chef`, build en `SQLX_OFFLINE=true`). Les migrations sont embarquées dans le binaire (`sqlx::migrate!()`) et appliquées automatiquement au démarrage du conteneur : pas de `sqlx-cli` ni d'étape séparée à prévoir.
+- `web` — image `apps/web/Dockerfile` (Next.js en mode `standalone`, buildée avec `turbo prune` pour un contexte Docker minimal). **`NEXT_PUBLIC_API_URL` est inlinée au build**, via `--build-arg` côté CD — la changer nécessite de republier une image, pas juste de redémarrer le conteneur.
+- `postgres-backup` — dump quotidien + rotation (7j/4sem/6mois) via [`prodrigestivill/postgres-backup-local`](https://github.com/prodrigestivill/docker-postgres-backup-local), zéro code à écrire.
+
+### Reverse proxy (Traefik)
+
+Le routage HTTPS est délégué à une stack **Traefik existante sur le VPS, en dehors de ce projet** (pas de service Traefik dans `docker-compose.prod.yml`). `api` et `web` rejoignent le réseau docker externe de cette stack (`traefik-public` par défaut) en plus de leur réseau interne, et portent des labels Traefik plutôt qu'un fichier de config dédié :
+
+```yaml
+labels:
+  - traefik.enable=true
+  - traefik.docker.network=${TRAEFIK_NETWORK}
+  - traefik.http.routers.lukyss-bar-web.rule=Host(`${DOMAIN}`)
+  - traefik.http.routers.lukyss-bar-web.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+  - traefik.http.routers.lukyss-bar-web.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+  - traefik.http.services.lukyss-bar-web.loadbalancer.server.port=3000
+```
+
+Trois variables dans `.env` (voir `env.prod`) doivent correspondre **exactement** à la stack Traefik déjà en place sur le serveur, pas à ce projet :
+
+- `TRAEFIK_NETWORK` — nom du réseau docker externe que Traefik écoute (`docker network ls` sur le VPS pour le retrouver).
+- `TRAEFIK_ENTRYPOINT` — nom de l'entrypoint HTTPS déclaré côté Traefik (souvent `websecure`).
+- `TRAEFIK_CERTRESOLVER` — nom du resolver ACME/Let's Encrypt déclaré côté Traefik (souvent `letsencrypt`).
+
+`DOMAIN`/`API_DOMAIN` (les noms de domaine réels) pilotent les règles `Host(...)`.
 
 <!--### Build
 

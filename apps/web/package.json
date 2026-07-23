@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@lukyss-bar/api-types": "*",
-    "@repo/ui": "*",
+    "@lukyss-bar/ui": "*",
     "@tailwindcss/postcss": "^4.1.18",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "@lukyss-bar/typescript-config": "*",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",

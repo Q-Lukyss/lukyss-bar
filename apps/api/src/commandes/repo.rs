@@ -169,9 +169,12 @@ pub async fn list_all(db: &PgPool) -> Result<Vec<CommandeRow>, ApiError> {
 pub async fn delete(db: &PgPool, id: &str) -> Result<DeleteMessage, ApiError> {
     get_row(db, id).await?;
 
-    sqlx::query!(r#"DELETE FROM cocktails_commandes WHERE commande_id = $1"#, id)
-        .execute(db)
-        .await?;
+    sqlx::query!(
+        r#"DELETE FROM cocktails_commandes WHERE commande_id = $1"#,
+        id
+    )
+    .execute(db)
+    .await?;
     sqlx::query!(r#"DELETE FROM commandes WHERE id = $1"#, id)
         .execute(db)
         .await?;
@@ -197,4 +200,19 @@ pub async fn update_status(
     .fetch_optional(db)
     .await?
     .ok_or_else(|| ApiError::NotFound("Commande introuvable".to_string()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_code;
+
+    #[test]
+    fn normalize_code_trims_and_uppercases() {
+        assert_eq!(normalize_code("  grandOpening  "), "GRANDOPENING");
+    }
+
+    #[test]
+    fn normalize_code_is_idempotent() {
+        assert_eq!(normalize_code("GRANDOPENING"), "GRANDOPENING");
+    }
 }

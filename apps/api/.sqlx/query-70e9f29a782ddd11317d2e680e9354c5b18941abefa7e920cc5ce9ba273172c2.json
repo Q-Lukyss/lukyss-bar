@@ -1,0 +1,112 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ci.id, ci.ingredient_id, i.name, i.stock, ci.quantity, ci.unity, ci.created_at, ci.updated_at\n           FROM cocktails_ingredients ci\n           INNER JOIN ingredients i ON i.id = ci.ingredient_id\n           WHERE ci.cocktail_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "ingredient_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "ingredient_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ingredients",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "stock",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "ingredients",
+            "name": "stock"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "quantity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "quantity"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "unity",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "unity"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamp",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamp",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "70e9f29a782ddd11317d2e680e9354c5b18941abefa7e920cc5ce9ba273172c2"
+}

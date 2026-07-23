@@ -1,0 +1,103 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE cocktails_ingredients\n           SET ingredient_id = COALESCE($2, ingredient_id),\n               quantity = COALESCE($3, quantity),\n               unity = COALESCE($4, unity),\n               updated_at = now()\n           WHERE id = $1\n           RETURNING id, cocktail_id, ingredient_id, quantity, unity, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "cocktail_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "cocktail_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "ingredient_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "ingredient_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "quantity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "quantity"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "unity",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "unity"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamp",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamp",
+        "origin": {
+          "Table": {
+            "table": "cocktails_ingredients",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "7f3c3de3d7a54c54421dcf78791318ef8123b4a9fcc0b87d2c27a1e97d64e6c5"
+}

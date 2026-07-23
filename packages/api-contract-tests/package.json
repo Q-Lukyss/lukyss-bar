@@ -1,0 +1,21 @@
+{
+  "name": "@lukyss-bar/api-contract-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "check-types": "tsc --noEmit",
+    "lint": "echo \"api-contract-tests: lint later\""
+  },
+  "dependencies": {
+    "@lukyss-bar/api-types": "*"
+  },
+  "devDependencies": {
+    "@lukyss-bar/typescript-config": "*",
+    "@types/ws": "^8.18.1",
+    "typescript": "5.9.2",
+    "vitest": "^4.1.10",
+    "ws": "^8.18.3"
+  }
+}

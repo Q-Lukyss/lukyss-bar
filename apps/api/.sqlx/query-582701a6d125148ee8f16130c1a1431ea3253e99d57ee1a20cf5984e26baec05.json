@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM cocktails",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "582701a6d125148ee8f16130c1a1431ea3253e99d57ee1a20cf5984e26baec05"
+}

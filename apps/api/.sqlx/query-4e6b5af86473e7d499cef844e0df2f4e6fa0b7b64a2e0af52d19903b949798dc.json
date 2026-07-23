@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO commandes (id, customer_name, promo_code, public_token, status, total_price)\n           VALUES ($1, $2, $3, $4, 'PENDING'::commande_status, $5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4e6b5af86473e7d499cef844e0df2f4e6fa0b7b64a2e0af52d19903b949798dc"
+}

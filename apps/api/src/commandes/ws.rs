@@ -51,11 +51,11 @@ async fn handle_socket(mut socket: WebSocket, state: AppState, token: String) {
 
     // Purge si plus personne n'écoute cette commande (voir aussi
     // `AppState::forget_commande`, appelé explicitement au statut COMPLETED).
-    if let Some(sender) = state.ws_registry.get(&token) {
-        if sender.receiver_count() == 0 {
-            drop(sender);
-            state.ws_registry.remove(&token);
-        }
+    if let Some(sender) = state.ws_registry.get(&token)
+        && sender.receiver_count() == 0
+    {
+        drop(sender);
+        state.ws_registry.remove(&token);
     }
 }
 

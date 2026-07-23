@@ -1,0 +1,155 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  api-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: lukyssbar_test
+          POSTGRES_USER: lukyss
+          POSTGRES_PASSWORD: lukyssbar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U lukyss -d lukyssbar_test"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+    env:
+      # SQLX_OFFLINE : la compilation utilise le cache .sqlx/ committé
+      # (cf. `cargo sqlx prepare`) plutôt que d'interroger la DB — seule
+      # l'exécution des tests (#[sqlx::test]) a besoin du postgres du service.
+      DATABASE_URL: postgres://lukyss:lukyssbar@localhost:5432/lukyssbar_test
+      SQLX_OFFLINE: "true"
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/api
+      - name: cargo fmt --check
+        run: cargo fmt --check
+      - name: cargo clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: cargo test
+        run: cargo test --all-targets
+
+  api-types-drift:
+    runs-on: ubuntu-latest
+    env:
+      SQLX_OFFLINE: "true"
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/api
+      - name: Régénérer les bindings TS depuis les types Rust
+        run: cargo run --bin export_types
+      - name: Échoue si les bindings générés diffèrent de ceux committés
+        run: git diff --exit-code -- ../../packages/api-types/generated
+
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx turbo run lint check-types build --filter=@lukyss-bar/web...
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: lukyssbar
+          POSTGRES_USER: lukyss
+          POSTGRES_PASSWORD: lukyssbar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U lukyss -d lukyssbar"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+    env:
+      DATABASE_URL: postgres://lukyss:lukyssbar@localhost:5432/lukyssbar
+      JWT_SECRET: ci-secret
+      FRONTEND_URL: http://localhost:3000
+      PORT: "3001"
+      API_URL: http://localhost:3001
+      R2_ACCOUNT_ID: ci
+      R2_ACCESS_KEY_ID: ci
+      R2_SECRET_ACCESS_KEY: ci
+      R2_BUCKET_NAME: ci
+      SQLX_OFFLINE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/api
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Démarrer l'API (les migrations s'appliquent automatiquement au démarrage)
+        working-directory: apps/api
+        run: |
+          cargo run &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3001/health && break
+            sleep 1
+          done
+          curl -sf http://localhost:3001/health
+      - name: Seed (crée l'admin utilisé par les tests de contrat)
+        working-directory: apps/api
+        run: cargo run --bin seed
+      - name: Tests de contrat (web/mobile ↔ api)
+        run: npm run test -w @lukyss-bar/api-contract-tests
+
+  docker-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - dockerfile: apps/api/Dockerfile
+            context: apps/api
+            name: api
+          - dockerfile: apps/web/Dockerfile
+            context: .
+            name: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build ${{ matrix.name }} (sans push, valide juste que l'image se construit)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}

@@ -4,8 +4,8 @@ use ulid::Ulid;
 use crate::{
     error::ApiError,
     types::cocktails::{
-        CocktailIngredientLinkRow, CocktailIngredientListItem, CocktailIngredientView,
-        CocktailRow, CocktailView, DeleteMessage,
+        CocktailIngredientLinkRow, CocktailIngredientListItem, CocktailIngredientView, CocktailRow,
+        CocktailView, DeleteMessage,
     },
 };
 
@@ -141,12 +141,9 @@ pub async fn list_cocktail_ingredients(
 }
 
 async fn ingredient_exists(db: &PgPool, ingredient_id: &str) -> Result<bool, ApiError> {
-    let row = sqlx::query!(
-        r#"SELECT id FROM ingredients WHERE id = $1"#,
-        ingredient_id
-    )
-    .fetch_optional(db)
-    .await?;
+    let row = sqlx::query!(r#"SELECT id FROM ingredients WHERE id = $1"#, ingredient_id)
+        .fetch_optional(db)
+        .await?;
 
     Ok(row.is_some())
 }
@@ -240,12 +237,11 @@ pub async fn update_ingredient_link(
 
         if let Some(duplicate_id) =
             find_link_by_ingredient(db, cocktail_id, new_ingredient_id).await?
+            && duplicate_id != link_id
         {
-            if duplicate_id != link_id {
-                return Err(ApiError::BadRequest(
-                    "Cet ingrédient est déjà associé à ce cocktail".to_string(),
-                ));
-            }
+            return Err(ApiError::BadRequest(
+                "Cet ingrédient est déjà associé à ce cocktail".to_string(),
+            ));
         }
     }
 

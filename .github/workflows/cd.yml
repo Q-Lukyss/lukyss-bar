@@ -1,0 +1,140 @@
+name: CD
+
+# api et web se versionnent et se déploient indépendamment : un tag
+# `api-vX.Y.Z` ne construit/déploie que l'API, un tag `web-vX.Y.Z` que le
+# web — jamais les deux, et jamais sur un simple push sur `main`. C'est le
+# développeur qui décide qu'un service est prêt à être publié :
+#
+#   git tag api-v1.2.0 && git push origin api-v1.2.0
+#   git tag web-v2.0.0 && git push origin web-v2.0.0
+on:
+  push:
+    tags:
+      - "api-v*.*.*"
+      - "web-v*.*.*"
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push-api:
+    if: startsWith(github.ref_name, 'api-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Login sur ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image + version (à partir du tag api-vX.Y.Z)
+        id: version
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=ghcr.io/${OWNER_LOWER}/lukyss-bar-api" >> "$GITHUB_OUTPUT"
+          VERSION="${GITHUB_REF_NAME#api-v}"          # api-v1.2.0 -> 1.2.0
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "minor=${VERSION%.*}" >> "$GITHUB_OUTPUT"   # 1.2.0 -> 1.2
+      - name: Build + push api
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/api
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.version.outputs.image }}:${{ steps.version.outputs.version }}
+            ${{ steps.version.outputs.image }}:${{ steps.version.outputs.minor }}
+            ${{ steps.version.outputs.image }}:latest
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+  build-and-push-web:
+    if: startsWith(github.ref_name, 'web-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Login sur ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image + version (à partir du tag web-vX.Y.Z)
+        id: version
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=ghcr.io/${OWNER_LOWER}/lukyss-bar-web" >> "$GITHUB_OUTPUT"
+          VERSION="${GITHUB_REF_NAME#web-v}"          # web-v2.0.0 -> 2.0.0
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "minor=${VERSION%.*}" >> "$GITHUB_OUTPUT"
+      - name: Build + push web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          # NEXT_PUBLIC_API_URL est inlinée au build (cf. apps/web/Dockerfile) :
+          # à définir dans Settings → Secrets and variables → Actions →
+          # Variables du repo (pas un secret, c'est une URL publique).
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+          tags: |
+            ${{ steps.version.outputs.image }}:${{ steps.version.outputs.version }}
+            ${{ steps.version.outputs.image }}:${{ steps.version.outputs.minor }}
+            ${{ steps.version.outputs.image }}:latest
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+  deploy-api:
+    needs: build-and-push-api
+    if: needs.build-and-push-api.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      # Persiste IMAGE_TAG_API dans le .env du serveur (pas juste passé en
+      # ligne de commande) pour qu'un `docker compose up -d` manuel plus
+      # tard reparte de la dernière version déployée, pas de `latest`.
+      - name: Déploiement api par SSH (pull + recreate, service api uniquement)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+            sed -i "s/^IMAGE_TAG_API=.*/IMAGE_TAG_API=${{ needs.build-and-push-api.outputs.version }}/" .env
+            docker compose -f docker-compose.prod.yml pull api
+            docker compose -f docker-compose.prod.yml up -d api
+            docker image prune -f
+
+  deploy-web:
+    needs: build-and-push-web
+    if: needs.build-and-push-web.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déploiement web par SSH (pull + recreate, service web uniquement)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+            sed -i "s/^IMAGE_TAG_WEB=.*/IMAGE_TAG_WEB=${{ needs.build-and-push-web.outputs.version }}/" .env
+            docker compose -f docker-compose.prod.yml pull web
+            docker compose -f docker-compose.prod.yml up -d web
+            docker image prune -f

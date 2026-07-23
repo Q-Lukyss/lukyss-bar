@@ -189,12 +189,12 @@ pub async fn update(
 ) -> ApiResult<Json<CocktailRow>> {
     let form = parse_cocktail_form(multipart).await?;
 
-    if let Some(price) = form.price {
-        if price < 0 {
-            return Err(ApiError::BadRequest(
-                "price must not be less than 0".to_string(),
-            ));
-        }
+    if let Some(price) = form.price
+        && price < 0
+    {
+        return Err(ApiError::BadRequest(
+            "price must not be less than 0".to_string(),
+        ));
     }
 
     let old_image = if form.image.is_some() {
@@ -218,10 +218,10 @@ pub async fn update(
     )
     .await?;
 
-    if let Some(old) = old_image {
-        if let Err(err) = upload::delete_image(&state.storage, &old).await {
-            tracing::warn!(error = ?err, "échec de la suppression de l'ancienne image R2");
-        }
+    if let Some(old) = old_image
+        && let Err(err) = upload::delete_image(&state.storage, &old).await
+    {
+        tracing::warn!(error = ?err, "échec de la suppression de l'ancienne image R2");
     }
 
     Ok(Json(updated))
@@ -320,12 +320,12 @@ pub async fn update_ingredient(
     Path((cocktail_id, cocktail_ingredient_id)): Path<(String, String)>,
     Json(body): Json<UpdateCocktailIngredientRequest>,
 ) -> ApiResult<Json<CocktailIngredientLinkRow>> {
-    if let Some(quantity) = body.quantity {
-        if quantity < 1 {
-            return Err(ApiError::BadRequest(
-                "quantity must not be less than 1".to_string(),
-            ));
-        }
+    if let Some(quantity) = body.quantity
+        && quantity < 1
+    {
+        return Err(ApiError::BadRequest(
+            "quantity must not be less than 1".to_string(),
+        ));
     }
 
     Ok(Json(

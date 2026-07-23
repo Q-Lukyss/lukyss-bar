@@ -49,3 +49,45 @@ pub fn verify(token: &str, secret: &str) -> Result<Claims, ApiError> {
 
     Ok(data.claims)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn user() -> AuthUser {
+        AuthUser {
+            id: "user-1".to_string(),
+            name: "Alice".to_string(),
+            email: "alice@example.com".to_string(),
+            is_admin: true,
+        }
+    }
+
+    #[test]
+    fn sign_then_verify_roundtrips_claims() {
+        let token = sign(&user(), "secret").expect("sign should succeed");
+        let claims = verify(&token, "secret").expect("verify should succeed");
+
+        assert_eq!(claims.id, "user-1");
+        assert_eq!(claims.name, "Alice");
+        assert_eq!(claims.email, "alice@example.com");
+        assert!(claims.is_admin);
+        assert!(claims.exp > chrono::Utc::now().timestamp());
+    }
+
+    #[test]
+    fn verify_rejects_token_signed_with_a_different_secret() {
+        let token = sign(&user(), "secret").expect("sign should succeed");
+
+        let result = verify(&token, "wrong-secret");
+
+        assert!(matches!(result, Err(ApiError::Unauthorized(_))));
+    }
+
+    #[test]
+    fn verify_rejects_garbage_token() {
+        let result = verify("not-a-jwt", "secret");
+
+        assert!(matches!(result, Err(ApiError::Unauthorized(_))));
+    }
+}

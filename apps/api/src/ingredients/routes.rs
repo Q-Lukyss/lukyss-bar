@@ -18,7 +18,7 @@ use super::repo;
 
 fn validate_name(name: &str) -> ApiResult<()> {
     let len = name.chars().count();
-    if len < 1 || len > 64 {
+    if !(1..=64).contains(&len) {
         return Err(ApiError::BadRequest(
             "name must be longer than or equal to 1 and shorter than or equal to 64 characters"
                 .to_string(),
@@ -178,7 +178,10 @@ pub async fn delete_ingredient(
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(list).post(create))
-        .route("/{id}", get(get_by_id).patch(update).delete(delete_ingredient))
+        .route(
+            "/{id}",
+            get(get_by_id).patch(update).delete(delete_ingredient),
+        )
         .route("/{id}/in-stock", patch(set_in_stock))
         .route("/{id}/out-of-stock", patch(set_out_of_stock))
 }

@@ -23,6 +23,7 @@ export function CodesTab({ jwt }: { jwt: string }) {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load n'est pas mémoïsée, ne l'exécuter qu'au montage
   useEffect(() => { load(); }, []);
 
   const handleCreate = async (e: React.FormEvent) => {

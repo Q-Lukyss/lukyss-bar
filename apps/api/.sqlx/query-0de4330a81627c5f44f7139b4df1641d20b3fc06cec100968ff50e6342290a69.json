@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM cocktails_ingredients WHERE id = $1 AND cocktail_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0de4330a81627c5f44f7139b4df1641d20b3fc06cec100968ff50e6342290a69"
+}
