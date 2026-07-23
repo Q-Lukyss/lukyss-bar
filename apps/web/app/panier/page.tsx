@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
-import api from "@ORGANIZATION/PROJECT-api";
+import { commandes } from "@lukyss-bar/api-types";
 import { getApiConnection } from "@/lib/api";
 
 export default function PanierPage() {
@@ -21,7 +21,7 @@ export default function PanierPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await api.functional.commandes.create(getApiConnection(), {
+      const result = await commandes.create(getApiConnection(), {
         customerName: customerName.trim(),
         promoCode: promoCode.trim(),
         items: items.map((i) => ({

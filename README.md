@@ -25,14 +25,14 @@ Ce Monorepo a été créé avec [TurboRepo](https://turborepo.com/).
 ## Apps and Packages
 
 - `web`: une app [Next.js](https://nextjs.org/)
-- `api`: une api [NestJs](https://nestjs.com/) app
+- `api`: une api [Rust](https://www.rust-lang.org/) ([axum](https://github.com/tokio-rs/axum) + [sqlx](https://github.com/launchbadge/sqlx) + [utoipa](https://github.com/juhaku/utoipa))
 - `mobile`: une app [React Native](https://reactnative.dev/) et [Expo](https://expo.dev/)
+- `@lukyss-bar/api-types`: types TS générés depuis l'API Rust ([ts-rs](https://github.com/Aleph-Alpha/ts-rs)) + client fetch
 - `@lukyss-bar/eslint-config`: `eslint` configurations (inclu `eslint-config-next` et `eslint-config-prettier`)
 - `@lukyss-bar/typescript-config`: `tsconfig.json`utilisée dans le monorepo
-- Drizzle
 - Postgres
 
-Chaque package/app est 100% [TypeScript](https://www.typescriptlang.org/).
+`web` et `mobile` sont en [TypeScript](https://www.typescriptlang.org/), `api` est en Rust.
 
 ## Utilities
 
@@ -45,23 +45,18 @@ Chaque package/app est 100% [TypeScript](https://www.typescriptlang.org/).
 up le container postgres
 
 ```
-npm -w @lukyss-bar/api run db:generate
 npm -w @lukyss-bar/api run db:migrate
 npm -w @lukyss-bar/api run db:seed
 ```
 
 ## API
 
-### impératifs nest cours
-
-
-- Utiliser Nest, Nestia (avec swagger generator), Temps réel, SDK FrontEnd Nestia
-- Utiliser une abstraction supplémentaire pour nest -> les répository
-- utiliser la clean archi
-- neverthrow pour Monade ResultAsync
-- guard rate limite avec redis ?
-- integrer un module de la liste (liste sur discord) Pino pour log?
-- Mono repo sur LukyssBar
+L'API (`apps/api`) est écrite en Rust : axum (routes/websocket), sqlx
+(Postgres, requêtes vérifiées à la compilation), utoipa (Swagger sur `/docs`
+et `/docs-json`), ts-rs (types partagés avec le frontend, exportés dans
+`packages/api-types`), jsonwebtoken + bcrypt (auth). Voir
+`docs/nestjs-legacy.md` pour l'ancienne implémentation NestJS (migration
+terminée, conservée pour référence historique).
 
 ### fonctionnalités
 
@@ -80,8 +75,8 @@ npm -w @lukyss-bar/api run db:seed
 - faire une commande si user normal + code promo pour valdier commande - ok
 	-> retourne liste cocktails, code promo utilisé, puis objet commande avec statut et prix total
 - Editer le Status d'une commande admin - ok
-- Ajouter Nestia et sdk front - ok (a tester)
-- temps reel pour suivi de commande (commande en attente d'acceptation, acceptee, en preparation, prete)
+- types partagés + client front générés (ts-rs, `packages/api-types`) - ok
+- temps reel pour suivi de commande (commande en attente d'acceptation, acceptee, en preparation, prete) - ok (WebSocket natif axum)
 - auto doc swagger pour l'api - ok sur /docs et /docs-json
 - Front Next
   - Page Accueil
@@ -91,11 +86,10 @@ npm -w @lukyss-bar/api run db:seed
   - Page front suivi commande
 - Front Mobile
 
-### packages
+### crates (Rust)
 
-- pg pour accès db postgres
-- passport pour authentification
-- bcrypt pour hashage de mot de passe
+- sqlx pour accès db postgres
+- jsonwebtoken + bcrypt pour authentification
 
 
 <!--### Build

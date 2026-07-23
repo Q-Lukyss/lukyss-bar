@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { IConnection } from "@nestia/fetcher";
-import api from "@ORGANIZATION/PROJECT-api";
-import { getApiConnection } from "@/lib/api";
+import { cocktails, ingredients } from "@lukyss-bar/api-types";
+import { authConnection, getApiConnection } from "@/lib/api";
 
 type IngredientLink = {
   id: string;
@@ -19,10 +18,6 @@ type AvailableIngredient = {
   name: string;
   stock: boolean;
 };
-
-function authConnection(jwt: string): IConnection {
-  return { ...getApiConnection(), headers: { Authorization: `Bearer ${jwt}` } };
-}
 
 const UNITY_SUGGESTIONS = ["ml", "cl", "dl", "g", "dash", "trait", "pièce"];
 
@@ -50,11 +45,8 @@ export function CocktailIngredientManager({
     setLoading(true);
     try {
       const [linksData, ingredientsData] = await Promise.all([
-        api.functional.cocktails.ingredients.getCocktailIngredients(
-          getApiConnection(),
-          cocktailId,
-        ),
-        api.functional.ingredients.list(getApiConnection()),
+        cocktails.ingredients.list(getApiConnection(), cocktailId),
+        ingredients.list(getApiConnection()),
       ]);
       setLinks(
         linksData.map((l) => ({
@@ -81,11 +73,11 @@ export function CocktailIngredientManager({
     setAdding(true);
     setError(null);
     try {
-      await api.functional.cocktails.ingredients.addIngredient(
-        authConnection(jwt),
-        cocktailId,
-        { ingredientId: selectedId, quantity: parseInt(quantity), unity },
-      );
+      await cocktails.ingredients.add(authConnection(jwt), cocktailId, {
+        ingredientId: selectedId,
+        quantity: parseInt(quantity),
+        unity,
+      });
       setShowAddForm(false);
       setSelectedId("");
       setQuantity("");
@@ -100,11 +92,7 @@ export function CocktailIngredientManager({
 
   const handleDelete = async (linkId: string) => {
     try {
-      await api.functional.cocktails.ingredients.deleteIngredient(
-        authConnection(jwt),
-        cocktailId,
-        linkId,
-      );
+      await cocktails.ingredients.delete(authConnection(jwt), cocktailId, linkId);
       await loadAll();
     } catch {
       setError("Erreur lors de la suppression.");

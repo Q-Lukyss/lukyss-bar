@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import api from "@ORGANIZATION/PROJECT-api";
+import { cocktails } from "@lukyss-bar/api-types";
 
 export const metadata: Metadata = { title: "Accueil" };
 import { getApiConnection } from "@/lib/api";
@@ -16,18 +16,18 @@ import { Footer } from "@/components/footer";
 async function getCocktailsWithIngredients(): Promise<
   CocktailWithIngredients[]
 > {
-  const list = await api.functional.cocktails.list(getApiConnection());
+  const list = await cocktails.list(getApiConnection());
   return Promise.all(
-    list.map((c) => api.functional.cocktails.getById(getApiConnection(), c.id))
+    list.map((c) => cocktails.getById(getApiConnection(), c.id))
   );
 }
 
 export default async function HomePage() {
-  let cocktails: CocktailWithIngredients[] | null = null;
+  let cocktailsList: CocktailWithIngredients[] | null = null;
   let error: string | null = null;
 
   try {
-    cocktails = await getCocktailsWithIngredients();
+    cocktailsList = await getCocktailsWithIngredients();
   } catch {
     error =
       "Impossible de contacter l'API. Vérifiez que le serveur est démarré sur le port 3001.";
@@ -46,7 +46,7 @@ export default async function HomePage() {
         </div>
       )}
 
-      {cocktails !== null && <CocktailsSection cocktails={cocktails} />}
+      {cocktailsList !== null && <CocktailsSection cocktails={cocktailsList} />}
 
       <Footer />
     </main>

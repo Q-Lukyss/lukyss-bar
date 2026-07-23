@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import api from "@ORGANIZATION/PROJECT-api";
+import { cocktails, type CocktailView } from "@lukyss-bar/api-types";
 import { getApiConnection } from "@/lib/api";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -9,12 +9,8 @@ import { Footer } from "@/components/footer";
 import { stonePlaceholder } from "@/lib/blur";
 import { imageUrl } from "@/lib/image-url";
 
-type CocktailDetail = Awaited<
-  ReturnType<typeof api.functional.cocktails.getById>
->;
-
-async function getCocktail(id: string): Promise<CocktailDetail> {
-  return api.functional.cocktails.getById(getApiConnection(), id);
+async function getCocktail(id: string): Promise<CocktailView> {
+  return cocktails.getById(getApiConnection(), id);
 }
 
 export async function generateMetadata({
@@ -38,7 +34,7 @@ export default async function CocktailDetailPage({
 }) {
   const { id } = await params;
 
-  let cocktail: CocktailDetail;
+  let cocktail: CocktailView;
   try {
     cocktail = await getCocktail(id);
   } catch {

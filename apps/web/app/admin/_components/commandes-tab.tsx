@@ -1,21 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { IConnection } from "@nestia/fetcher";
-import api from "@ORGANIZATION/PROJECT-api";
-import { getApiConnection } from "@/lib/api";
-
-type CommandeRow = Awaited<
-  ReturnType<typeof api.functional.commandes.listAll>
->[number];
-
-type CommandeView = Awaited<
-  ReturnType<typeof api.functional.commandes.getById>
->;
-
-type CocktailView = Awaited<
-  ReturnType<typeof api.functional.cocktails.getById>
->;
+import {
+  commandes,
+  cocktails,
+  type CommandeRow,
+  type CommandeView,
+  type CocktailView,
+} from "@lukyss-bar/api-types";
+import { authConnection, getApiConnection } from "@/lib/api";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "En attente",
@@ -29,12 +22,8 @@ const STATUS_OPTIONS = Object.keys(STATUS_LABELS) as Array<
   keyof typeof STATUS_LABELS
 >;
 
-function authConnection(jwt: string): IConnection {
-  return { ...getApiConnection(), headers: { Authorization: `Bearer ${jwt}` } };
-}
-
 export function CommandesTab({ jwt }: { jwt: string }) {
-  const [commandes, setCommandes] = useState<CommandeRow[] | null>(null);
+  const [commandesList, setCommandesList] = useState<CommandeRow[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -49,9 +38,7 @@ export function CommandesTab({ jwt }: { jwt: string }) {
     setLoading(true);
     setError(null);
     try {
-      setCommandes(
-        await api.functional.commandes.listAll(authConnection(jwt)),
-      );
+      setCommandesList(await commandes.listAll(authConnection(jwt)));
     } catch {
       setError("Erreur lors du chargement des commandes.");
     } finally {
@@ -62,11 +49,9 @@ export function CommandesTab({ jwt }: { jwt: string }) {
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id);
     try {
-      await api.functional.commandes.status.updateStatus(
-        authConnection(jwt),
-        id,
-        { status: status as CommandeRow["status"] },
-      );
+      await commandes.updateStatus(authConnection(jwt), id, {
+        status,
+      });
       await load();
     } catch {
       setError("Erreur lors de la mise à jour.");
@@ -79,7 +64,7 @@ export function CommandesTab({ jwt }: { jwt: string }) {
     setDeleting(id);
     setError(null);
     try {
-      await api.functional.commandes._delete(authConnection(jwt), id);
+      await commandes.delete(authConnection(jwt), id);
       setConfirmDelete(null);
       await load();
     } catch {
@@ -99,7 +84,7 @@ export function CommandesTab({ jwt }: { jwt: string }) {
 
     setLoadingDetail(id);
     try {
-      const view = await api.functional.commandes.getById(authConnection(jwt), id);
+      const view = await commandes.getById(authConnection(jwt), id);
       setCommandeDetails((prev) => ({ ...prev, [id]: view }));
 
       const uniqueCocktailIds = [...new Set(view.items.map((i) => i.cocktailId))];
@@ -107,7 +92,7 @@ export function CommandesTab({ jwt }: { jwt: string }) {
 
       if (missing.length > 0) {
         const results = await Promise.all(
-          missing.map((cid) => api.functional.cocktails.getById(getApiConnection(), cid)),
+          missing.map((cid) => cocktails.getById(getApiConnection(), cid)),
         );
         setCocktailDetails((prev) => {
           const next = { ...prev };
@@ -122,7 +107,7 @@ export function CommandesTab({ jwt }: { jwt: string }) {
     }
   };
 
-  if (!commandes && !loading) {
+  if (!commandesList && !loading) {
     return (
       <div className="flex flex-col items-center gap-4 py-16">
         <p className="font-playfair text-stone-500">
@@ -141,9 +126,9 @@ export function CommandesTab({ jwt }: { jwt: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        {commandes !== null && (
+        {commandesList !== null && (
           <p className="font-playfair text-sm text-stone-500">
-            {commandes.length} commande{commandes.length > 1 ? "s" : ""}
+            {commandesList.length} commande{commandesList.length > 1 ? "s" : ""}
           </p>
         )}
         <button
@@ -161,11 +146,11 @@ export function CommandesTab({ jwt }: { jwt: string }) {
         </div>
       )}
 
-      {commandes?.length === 0 && (
+      {commandesList?.length === 0 && (
         <p className="font-playfair text-stone-600">Aucune commande.</p>
       )}
 
-      {commandes?.map((cmd) => {
+      {commandesList?.map((cmd) => {
         const detail = commandeDetails[cmd.id];
         const isExpanded = expandedId === cmd.id;
         const isLoadingDetail = loadingDetail === cmd.id;

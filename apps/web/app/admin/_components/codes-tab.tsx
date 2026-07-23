@@ -1,18 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { IConnection } from "@nestia/fetcher";
-import api from "@ORGANIZATION/PROJECT-api";
-import { getApiConnection } from "@/lib/api";
-
-type CodeRow = Awaited<ReturnType<typeof api.functional.codes.list>>[number];
-
-function authConnection(jwt: string): IConnection {
-  return { ...getApiConnection(), headers: { Authorization: `Bearer ${jwt}` } };
-}
+import { codes, type CodeRow } from "@lukyss-bar/api-types";
+import { authConnection } from "@/lib/api";
 
 export function CodesTab({ jwt }: { jwt: string }) {
-  const [codes, setCodes] = useState<CodeRow[]>([]);
+  const [codesList, setCodesList] = useState<CodeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newCode, setNewCode] = useState("");
@@ -22,7 +15,7 @@ export function CodesTab({ jwt }: { jwt: string }) {
   const load = async () => {
     setLoading(true);
     try {
-      setCodes(await api.functional.codes.list(authConnection(jwt)));
+      setCodesList(await codes.list(authConnection(jwt)));
     } catch {
       setError("Erreur lors du chargement.");
     } finally {
@@ -37,8 +30,8 @@ export function CodesTab({ jwt }: { jwt: string }) {
     setCreating(true);
     setError(null);
     try {
-      await api.functional.codes.create(authConnection(jwt), {
-        code: newCode.trim().toUpperCase() || undefined,
+      await codes.create(authConnection(jwt), {
+        code: newCode.trim().toUpperCase() || null,
       });
       setNewCode("");
       await load();
@@ -53,7 +46,7 @@ export function CodesTab({ jwt }: { jwt: string }) {
     setDeleting(id);
     setError(null);
     try {
-      await api.functional.codes._delete(authConnection(jwt), id);
+      await codes.delete(authConnection(jwt), id);
       await load();
     } catch {
       setError("Erreur lors de la suppression.");
@@ -92,11 +85,11 @@ export function CodesTab({ jwt }: { jwt: string }) {
       )}
 
       <p className="font-playfair text-sm text-stone-500">
-        {loading ? "Chargement..." : `${codes.length} code${codes.length > 1 ? "s" : ""}`}
+        {loading ? "Chargement..." : `${codesList.length} code${codesList.length > 1 ? "s" : ""}`}
       </p>
 
       <div className="flex flex-col gap-2">
-        {codes.map((c) => (
+        {codesList.map((c) => (
           <div
             key={c.id}
             className="rounded-xl border border-amber-800/20 bg-stone-900 px-5 py-3 flex items-center justify-between gap-4"
@@ -113,7 +106,7 @@ export function CodesTab({ jwt }: { jwt: string }) {
             </button>
           </div>
         ))}
-        {codes.length === 0 && !loading && (
+        {codesList.length === 0 && !loading && (
           <p className="font-playfair text-stone-600">Aucun code promo.</p>
         )}
       </div>

@@ -2,13 +2,8 @@
 
 import { use, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { io } from "socket.io-client";
-import api from "@ORGANIZATION/PROJECT-api";
+import { commandes, type CommandeView } from "@lukyss-bar/api-types";
 import { getApiConnection } from "@/lib/api";
-
-type CommandeView = Awaited<
-  ReturnType<typeof api.functional.commandes._public.getByPublicToken>
->;
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "En attente de confirmation",
@@ -38,11 +33,7 @@ export default function CommandeTrackingPage({
 
   const fetchCommande = useCallback(async () => {
     try {
-      const result =
-        await api.functional.commandes._public.getByPublicToken(
-          getApiConnection(),
-          token,
-        );
+      const result = await commandes.getByPublicToken(getApiConnection(), token);
       setData(result);
       setError(null);
     } catch {
@@ -54,29 +45,52 @@ export default function CommandeTrackingPage({
     fetchCommande();
   }, [fetchCommande]);
 
+  // WebSocket natif (remplace le client Socket.IO) : le token est dans l'URL,
+  // pas de handshake "join:commande" nécessaire. Reconnexion avec un léger
+  // délai tant que la page reste montée, pour retrouver le comportement de
+  // reconnexion automatique de Socket.IO.
   useEffect(() => {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+    let socket: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let stopped = false;
 
-    const socket = io(apiUrl, { transports: ["websocket"] });
+    const connect = () => {
+      const wsUrl = commandes.wsUrl(getApiConnection(), token);
+      socket = new WebSocket(wsUrl);
 
-    socket.on("connect", () => {
-      setConnected(true);
-      socket.emit("join:commande", token);
-    });
+      socket.addEventListener("open", () => setConnected(true));
 
-    socket.on("disconnect", () => setConnected(false));
+      socket.addEventListener("message", (event) => {
+        try {
+          const { status } = JSON.parse(event.data) as { status: string };
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  commande: {
+                    ...prev.commande,
+                    status: status as CommandeView["commande"]["status"],
+                  },
+                }
+              : prev,
+          );
+        } catch {
+          // message non-JSON ignoré
+        }
+      });
 
-    socket.on("commande:status", ({ status }: { status: string }) => {
-      setData((prev) =>
-        prev
-          ? { ...prev, commande: { ...prev.commande, status: status as CommandeView["commande"]["status"] } }
-          : prev,
-      );
-    });
+      socket.addEventListener("close", () => {
+        setConnected(false);
+        if (!stopped) reconnectTimer = setTimeout(connect, 2000);
+      });
+    };
+
+    connect();
 
     return () => {
-      socket.disconnect();
+      stopped = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      socket?.close();
     };
   }, [token]);
 

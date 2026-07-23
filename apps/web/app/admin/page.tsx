@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import api from "@ORGANIZATION/PROJECT-api";
+import { auth } from "@lukyss-bar/api-types";
 import { getApiConnection } from "@/lib/api";
 import { CommandesTab } from "./_components/commandes-tab";
 import { CocktailsTab } from "./_components/cocktails-tab";
@@ -33,7 +33,7 @@ export default function AdminPage() {
     setLoginLoading(true);
     setLoginError(null);
     try {
-      const result = await api.functional.auth.login(getApiConnection(), {
+      const result = await auth.login(getApiConnection(), {
         email: email.trim(),
         password,
       });

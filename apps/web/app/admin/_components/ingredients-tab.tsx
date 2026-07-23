@@ -1,18 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { IConnection } from "@nestia/fetcher";
-import api from "@ORGANIZATION/PROJECT-api";
-import { getApiConnection } from "@/lib/api";
-
-type IngredientRow = Awaited<ReturnType<typeof api.functional.ingredients.list>>[number];
-
-function authConnection(jwt: string): IConnection {
-  return { ...getApiConnection(), headers: { Authorization: `Bearer ${jwt}` } };
-}
+import { ingredients, type IngredientRow } from "@lukyss-bar/api-types";
+import { authConnection, getApiConnection } from "@/lib/api";
 
 export function IngredientsTab({ jwt }: { jwt: string }) {
-  const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
+  const [ingredientsList, setIngredientsList] = useState<IngredientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
@@ -24,7 +17,7 @@ export function IngredientsTab({ jwt }: { jwt: string }) {
   const load = async () => {
     setLoading(true);
     try {
-      setIngredients(await api.functional.ingredients.list(getApiConnection()));
+      setIngredientsList(await ingredients.list(getApiConnection()));
     } catch {
       setError("Erreur lors du chargement.");
     } finally {
@@ -40,7 +33,7 @@ export function IngredientsTab({ jwt }: { jwt: string }) {
     setCreating(true);
     setError(null);
     try {
-      await api.functional.ingredients.create(authConnection(jwt), { name: newName.trim() });
+      await ingredients.create(authConnection(jwt), { name: newName.trim(), stock: true });
       setNewName("");
       await load();
     } catch {
@@ -55,7 +48,7 @@ export function IngredientsTab({ jwt }: { jwt: string }) {
     setSaving(id);
     setError(null);
     try {
-      await api.functional.ingredients.update(authConnection(jwt), id, { name: editName.trim() });
+      await ingredients.update(authConnection(jwt), id, { name: editName.trim(), stock: null });
       setEditId(null);
       await load();
     } catch {
@@ -69,7 +62,7 @@ export function IngredientsTab({ jwt }: { jwt: string }) {
     setSaving(id);
     setError(null);
     try {
-      await api.functional.ingredients._delete(authConnection(jwt), id);
+      await ingredients.delete(authConnection(jwt), id);
       await load();
     } catch {
       setError("Erreur lors de la suppression.");
@@ -83,9 +76,9 @@ export function IngredientsTab({ jwt }: { jwt: string }) {
     setError(null);
     try {
       if (ing.stock) {
-        await api.functional.ingredients.out_of_stock.outOfStock(authConnection(jwt), ing.id);
+        await ingredients.outOfStock(authConnection(jwt), ing.id);
       } else {
-        await api.functional.ingredients.in_stock.inStock(authConnection(jwt), ing.id);
+        await ingredients.inStock(authConnection(jwt), ing.id);
       }
       await load();
     } catch {
@@ -125,11 +118,11 @@ export function IngredientsTab({ jwt }: { jwt: string }) {
       )}
 
       <p className="font-playfair text-sm text-stone-500">
-        {loading ? "Chargement..." : `${ingredients.length} ingrédient${ingredients.length > 1 ? "s" : ""}`}
+        {loading ? "Chargement..." : `${ingredientsList.length} ingrédient${ingredientsList.length > 1 ? "s" : ""}`}
       </p>
 
       <div className="flex flex-col gap-2">
-        {ingredients.map((ing) => (
+        {ingredientsList.map((ing) => (
           <div
             key={ing.id}
             className="rounded-xl border border-amber-800/20 bg-stone-900 px-5 py-3 flex items-center gap-3"

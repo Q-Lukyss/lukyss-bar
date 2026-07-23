@@ -1,24 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { IConnection } from "@nestia/fetcher";
-import api from "@ORGANIZATION/PROJECT-api";
-import { getApiConnection } from "@/lib/api";
+import { cocktails, type CocktailRow } from "@lukyss-bar/api-types";
+import { authConnection, getApiConnection } from "@/lib/api";
 import { CocktailForm, type CocktailFormData } from "./cocktail-form";
 import { CocktailIngredientManager } from "./cocktail-ingredient-manager";
 
 import { imageUrl } from "@/lib/image-url";
 
-type CocktailRow = Awaited<
-  ReturnType<typeof api.functional.cocktails.list>
->[number];
-
-function authConnection(jwt: string): IConnection {
-  return { ...getApiConnection(), headers: { Authorization: `Bearer ${jwt}` } };
-}
-
 export function CocktailsTab({ jwt }: { jwt: string }) {
-  const [cocktails, setCocktails] = useState<CocktailRow[]>([]);
+  const [cocktailsList, setCocktailsList] = useState<CocktailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -28,7 +19,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
   const load = async () => {
     setLoading(true);
     try {
-      setCocktails(await api.functional.cocktails.list(getApiConnection()));
+      setCocktailsList(await cocktails.list(getApiConnection()));
     } catch {
       setError("Erreur lors du chargement.");
     } finally {
@@ -44,15 +35,12 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
     setSaving(true);
     setError(null);
     try {
-      const created = await api.functional.cocktails.create(
-        authConnection(jwt),
-        {
-          name: data.name,
-          price: data.price,
-          description: data.description || undefined,
-          image: data.image ?? undefined,
-        },
-      );
+      const created = await cocktails.create(authConnection(jwt), {
+        name: data.name,
+        price: data.price,
+        description: data.description || undefined,
+        image: data.image ?? undefined,
+      });
       setShowCreate(false);
       setEditId(created.id);
       await load();
@@ -67,7 +55,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
     setSaving(true);
     setError(null);
     try {
-      await api.functional.cocktails.update(authConnection(jwt), id, {
+      await cocktails.update(authConnection(jwt), id, {
         name: data.name,
         price: data.price,
         description: data.description || undefined,
@@ -87,7 +75,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
         <p className="font-playfair text-sm text-stone-500">
           {loading
             ? "Chargement…"
-            : `${cocktails.length} cocktail${cocktails.length > 1 ? "s" : ""}`}
+            : `${cocktailsList.length} cocktail${cocktailsList.length > 1 ? "s" : ""}`}
         </p>
         {!showCreate && (
           <button
@@ -117,7 +105,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
       )}
 
       <div className="flex flex-col gap-3">
-        {cocktails.map((c) =>
+        {cocktailsList.map((c) =>
           editId === c.id ? (
             <div
               key={c.id}
