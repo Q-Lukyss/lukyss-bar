@@ -35,6 +35,11 @@ pub async fn ensure_exists(db: &PgPool, id: &str) -> Result<(), ApiError> {
     get_row(db, id).await.map(|_| ())
 }
 
+/// Chemin de l'image actuellement associée au cocktail, avant remplacement.
+pub async fn get_image(db: &PgPool, id: &str) -> Result<Option<String>, ApiError> {
+    Ok(get_row(db, id).await?.image)
+}
+
 async fn ingredients_for_cocktail(
     db: &PgPool,
     cocktail_id: &str,

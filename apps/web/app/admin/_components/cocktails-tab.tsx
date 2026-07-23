@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { cocktails, type CocktailRow } from "@lukyss-bar/api-types";
 import { authConnection, getApiConnection } from "@/lib/api";
 import { CocktailForm, type CocktailFormData } from "./cocktail-form";
@@ -131,9 +132,11 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
               className="flex items-center gap-4 rounded-xl border border-amber-800/30 bg-stone-900 p-5 transition-colors hover:border-amber-800/50"
             >
               {c.image && (
-                <img
+                <Image
                   src={imageUrl(c.image)!}
                   alt={c.name}
+                  width={48}
+                  height={48}
                   className="h-12 w-12 shrink-0 rounded-lg object-cover"
                 />
               )}

@@ -54,6 +54,13 @@ dashmap = "6.1"
 # upload validation
 infer = "0.19"
 
+# stockage des images (Cloudflare R2, API compatible S3)
+aws-sdk-s3 = "1"
+
+# conversion des images uploadées en webp
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+webp = "0.3"
+
 # génération de types TS partagés avec le frontend
 ts-rs = { version = "10.1", features = ["chrono-impl", "uuid-impl"] }
 

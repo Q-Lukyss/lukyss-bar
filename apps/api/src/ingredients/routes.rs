@@ -29,6 +29,7 @@ fn validate_name(name: &str) -> ApiResult<()> {
 
 #[utoipa::path(
     get,
+    operation_id = "list_ingredients",
     path = "/ingredients",
     responses((status = 200, description = "Liste des ingrédients", body = Vec<IngredientRow>)),
     tag = "ingredients"
@@ -39,6 +40,7 @@ pub async fn list(State(state): State<AppState>) -> ApiResult<Json<Vec<Ingredien
 
 #[utoipa::path(
     get,
+    operation_id = "get_ingredient_by_id",
     path = "/ingredients/{id}",
     params(("id" = String, Path)),
     responses(
@@ -64,6 +66,7 @@ pub struct CreateIngredientRequest {
 
 #[utoipa::path(
     post,
+    operation_id = "create_ingredient",
     path = "/ingredients",
     request_body = CreateIngredientRequest,
     responses((status = 200, description = "Ingrédient créé", body = IngredientRow)),
@@ -93,6 +96,7 @@ pub struct UpdateIngredientRequest {
 
 #[utoipa::path(
     patch,
+    operation_id = "update_ingredient",
     path = "/ingredients/{id}",
     params(("id" = String, Path)),
     request_body = UpdateIngredientRequest,
@@ -153,6 +157,7 @@ pub async fn set_out_of_stock(
 
 #[utoipa::path(
     delete,
+    operation_id = "delete_ingredient",
     path = "/ingredients/{id}",
     params(("id" = String, Path)),
     responses(

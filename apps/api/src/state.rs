@@ -1,9 +1,11 @@
-use std::{path::PathBuf, sync::Arc};
+use std::sync::Arc;
 
 use dashmap::DashMap;
 use serde::Serialize;
 use sqlx::PgPool;
 use tokio::sync::broadcast;
+
+use crate::storage::R2Storage;
 
 /// Event envoyé aux clients WebSocket abonnés à une commande (miroir de
 /// `commandes.gateway.ts` : `commande:status`).
@@ -24,7 +26,7 @@ pub struct AppState {
     pub ws_registry: WsRegistry,
     pub jwt_secret: Arc<str>,
     pub frontend_url: Arc<str>,
-    pub upload_dir: Arc<PathBuf>,
+    pub storage: R2Storage,
 }
 
 impl AppState {

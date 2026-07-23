@@ -8,8 +8,10 @@ pub mod ingredients;
 pub mod openapi;
 pub mod routes;
 pub mod state;
+pub mod storage;
 pub mod telemetry;
 pub mod types;
+pub mod uploads;
 
 use std::sync::Arc;
 
@@ -21,11 +23,11 @@ use axum::{
 };
 use dashmap::DashMap;
 use sqlx::postgres::PgPoolOptions;
-use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{config::Config, openapi::ApiDoc, state::AppState};
+use crate::{config::Config, openapi::ApiDoc, state::AppState, storage::R2Storage};
 
 pub async fn run() -> anyhow::Result<()> {
     telemetry::init();
@@ -37,8 +39,12 @@ pub async fn run() -> anyhow::Result<()> {
         .connect(&config.database_url)
         .await?;
 
-    let upload_dir = std::env::current_dir()?.join("uploads");
-    std::fs::create_dir_all(upload_dir.join("cocktails"))?;
+    let storage = R2Storage::new(
+        &config.r2_account_id,
+        &config.r2_access_key_id,
+        &config.r2_secret_access_key,
+        &config.r2_bucket_name,
+    );
 
     let cors = build_cors(&config.frontend_url)?;
 
@@ -47,7 +53,7 @@ pub async fn run() -> anyhow::Result<()> {
         ws_registry: Arc::new(DashMap::new()),
         jwt_secret: config.jwt_secret.into(),
         frontend_url: config.frontend_url.into(),
-        upload_dir: Arc::new(upload_dir.clone()),
+        storage,
     };
 
     let app = Router::new()
@@ -59,7 +65,7 @@ pub async fn run() -> anyhow::Result<()> {
         .nest("/codes", codes::routes::router())
         .nest("/commandes", commandes::routes::router())
         .merge(SwaggerUi::new("/docs").url("/docs-json", ApiDoc::openapi()))
-        .nest_service("/uploads", ServeDir::new(upload_dir))
+        .nest("/uploads", uploads::router())
         .layer(DefaultBodyLimit::max(6 * 1024 * 1024))
         .layer(cors)
         .layer(TraceLayer::new_for_http())

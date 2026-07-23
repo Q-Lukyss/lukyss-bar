@@ -83,6 +83,7 @@ async fn parse_cocktail_form(mut multipart: Multipart) -> ApiResult<CocktailForm
 
 #[utoipa::path(
     get,
+    operation_id = "list_cocktails",
     path = "/cocktails",
     responses((status = 200, description = "Liste des cocktails", body = Vec<CocktailRow>)),
     tag = "cocktails"
@@ -93,6 +94,7 @@ pub async fn list(State(state): State<AppState>) -> ApiResult<Json<Vec<CocktailR
 
 #[utoipa::path(
     get,
+    operation_id = "get_cocktail_by_id",
     path = "/cocktails/{id}",
     params(("id" = String, Path)),
     responses(
@@ -122,6 +124,7 @@ pub struct CocktailMultipartForm {
 
 #[utoipa::path(
     post,
+    operation_id = "create_cocktail",
     path = "/cocktails",
     request_body(content = CocktailMultipartForm, content_type = "multipart/form-data"),
     responses((status = 200, description = "Cocktail créé", body = CocktailRow)),
@@ -149,7 +152,7 @@ pub async fn create(
     }
 
     let image_path = match form.image {
-        Some(img) => Some(upload::save_image(&state.upload_dir, img).await?),
+        Some(img) => Some(upload::save_image(&state.storage, img).await?),
         None => None,
     };
 
@@ -167,6 +170,7 @@ pub async fn create(
 
 #[utoipa::path(
     patch,
+    operation_id = "update_cocktail",
     path = "/cocktails/{id}",
     params(("id" = String, Path)),
     request_body(content = CocktailMultipartForm, content_type = "multipart/form-data"),
@@ -193,22 +197,34 @@ pub async fn update(
         }
     }
 
+    let old_image = if form.image.is_some() {
+        repo::get_image(&state.db, &id).await?
+    } else {
+        None
+    };
+
     let image_path = match form.image {
-        Some(img) => Some(upload::save_image(&state.upload_dir, img).await?),
+        Some(img) => Some(upload::save_image(&state.storage, img).await?),
         None => None,
     };
 
-    Ok(Json(
-        repo::update(
-            &state.db,
-            &id,
-            form.name.as_deref(),
-            form.price,
-            form.description.as_deref(),
-            image_path.as_deref(),
-        )
-        .await?,
-    ))
+    let updated = repo::update(
+        &state.db,
+        &id,
+        form.name.as_deref(),
+        form.price,
+        form.description.as_deref(),
+        image_path.as_deref(),
+    )
+    .await?;
+
+    if let Some(old) = old_image {
+        if let Err(err) = upload::delete_image(&state.storage, &old).await {
+            tracing::warn!(error = ?err, "échec de la suppression de l'ancienne image R2");
+        }
+    }
+
+    Ok(Json(updated))
 }
 
 #[utoipa::path(
@@ -286,6 +302,7 @@ pub struct UpdateCocktailIngredientRequest {
 
 #[utoipa::path(
     patch,
+    operation_id = "update_cocktail_ingredient_link",
     path = "/cocktails/{cocktail_id}/ingredients/{cocktail_ingredient_id}",
     params(("cocktail_id" = String, Path), ("cocktail_ingredient_id" = String, Path)),
     request_body = UpdateCocktailIngredientRequest,
@@ -326,6 +343,7 @@ pub async fn update_ingredient(
 
 #[utoipa::path(
     delete,
+    operation_id = "delete_cocktail_ingredient_link",
     path = "/cocktails/{cocktail_id}/ingredients/{cocktail_ingredient_id}",
     params(("cocktail_id" = String, Path), ("cocktail_ingredient_id" = String, Path)),
     responses(

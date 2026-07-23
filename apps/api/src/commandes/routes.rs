@@ -40,6 +40,7 @@ pub struct CreateCommandeRequest {
 
 #[utoipa::path(
     post,
+    operation_id = "create_commande",
     path = "/commandes",
     request_body = CreateCommandeRequest,
     responses(
@@ -110,6 +111,7 @@ pub async fn list_all(
 
 #[utoipa::path(
     get,
+    operation_id = "get_commande_by_id",
     path = "/commandes/{id}",
     params(("id" = String, Path)),
     responses(

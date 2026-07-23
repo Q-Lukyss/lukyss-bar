@@ -25,6 +25,7 @@ pub struct CreateCodeRequest {
 
 #[utoipa::path(
     post,
+    operation_id = "create_code",
     path = "/codes",
     request_body = CreateCodeRequest,
     responses((status = 200, description = "Code promo créé (ou auto-généré)", body = CodeRow)),
@@ -70,6 +71,7 @@ pub async fn delete_code(
 
 #[utoipa::path(
     get,
+    operation_id = "list_codes",
     path = "/codes",
     responses((status = 200, description = "Liste des codes promo", body = Vec<CodeRow>)),
     security(("bearer_auth" = [])),

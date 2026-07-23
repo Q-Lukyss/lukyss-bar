@@ -6,6 +6,10 @@ pub struct Config {
     pub jwt_secret: String,
     pub frontend_url: String,
     pub port: u16,
+    pub r2_account_id: String,
+    pub r2_access_key_id: String,
+    pub r2_secret_access_key: String,
+    pub r2_bucket_name: String,
 }
 
 impl Config {
@@ -21,12 +25,23 @@ impl Config {
             .ok()
             .and_then(|p| p.parse().ok())
             .unwrap_or(3001);
+        let r2_account_id = env::var("R2_ACCOUNT_ID").context("R2_ACCOUNT_ID est manquant dans env")?;
+        let r2_access_key_id =
+            env::var("R2_ACCESS_KEY_ID").context("R2_ACCESS_KEY_ID est manquant dans env")?;
+        let r2_secret_access_key = env::var("R2_SECRET_ACCESS_KEY")
+            .context("R2_SECRET_ACCESS_KEY est manquant dans env")?;
+        let r2_bucket_name =
+            env::var("R2_BUCKET_NAME").context("R2_BUCKET_NAME est manquant dans env")?;
 
         Ok(Self {
             database_url,
             jwt_secret,
             frontend_url,
             port,
+            r2_account_id,
+            r2_access_key_id,
+            r2_secret_access_key,
+            r2_bucket_name,
         })
     }
 }

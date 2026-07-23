@@ -1,5 +1,3 @@
 /target
 /bindings
 .env
-/uploads/cocktails/*
-!/uploads/cocktails/.gitkeep
