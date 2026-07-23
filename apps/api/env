@@ -1,0 +1,4 @@
+DATABASE_URL=postgres://lukyss:lukyssbar@localhost:5432/lukyssbar
+JWT_SECRET=dev-secret
+FRONTEND_URL=http://localhost:3000
+PORT=3001
