@@ -95,8 +95,11 @@ jobs:
             ${{ steps.version.outputs.image }}:${{ steps.version.outputs.version }}
             ${{ steps.version.outputs.image }}:${{ steps.version.outputs.minor }}
             ${{ steps.version.outputs.image }}:latest
-          cache-from: type=gha,scope=web
-          cache-to: type=gha,mode=max,scope=web
+          # Scope dédié (jamais partagé avec ci.yml, qui build sans le vrai
+          # NEXT_PUBLIC_API_URL) : évite de réutiliser un layer caché avec la
+          # mauvaise valeur figée dedans.
+          cache-from: type=gha,scope=web-release
+          cache-to: type=gha,mode=max,scope=web-release
 
   deploy-api:
     needs: build-and-push-api

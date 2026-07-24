@@ -148,9 +148,16 @@ jobs:
           - dockerfile: apps/api/Dockerfile
             context: apps/api
             name: api
+            cache_scope: api
           - dockerfile: apps/web/Dockerfile
             context: .
             name: web
+            # Scope de cache distinct de celui utilisé par cd.yml pour la
+            # vraie image de release : ce job ne passe pas la bonne valeur
+            # de NEXT_PUBLIC_API_URL (juste celle par défaut du Dockerfile),
+            # un scope partagé ferait risquer de réutiliser en release un
+            # layer caché ici avec la mauvaise valeur figée dedans.
+            cache_scope: web-ci
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -160,5 +167,5 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: false
-          cache-from: type=gha,scope=${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+          cache-from: type=gha,scope=${{ matrix.cache_scope }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.cache_scope }}
