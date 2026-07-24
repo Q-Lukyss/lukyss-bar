@@ -148,24 +148,24 @@ jobs:
           - dockerfile: apps/api/Dockerfile
             context: apps/api
             name: api
-            cache_scope: api
           - dockerfile: apps/web/Dockerfile
             context: .
             name: web
-            # Scope de cache distinct de celui utilisé par cd.yml pour la
-            # vraie image de release : ce job ne passe pas la bonne valeur
-            # de NEXT_PUBLIC_API_URL (juste celle par défaut du Dockerfile),
-            # un scope partagé ferait risquer de réutiliser en release un
-            # layer caché ici avec la mauvaise valeur figée dedans.
-            cache_scope: web-ci
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+      # Scope de cache "web" distinct de celui de cd.yml (web-release) : ce
+      # job ne passe pas le vrai NEXT_PUBLIC_API_URL (juste la valeur par
+      # défaut du Dockerfile), un scope partagé ferait risquer de réutiliser
+      # en release un layer caché ici avec la mauvaise valeur figée dedans.
+      # Volontairement pas une clé de la matrice (ça changerait le nom du
+      # check généré par GitHub, qui doit rester identique à ce qui est
+      # enregistré dans la protection de branche).
       - name: Build ${{ matrix.name }} (sans push, valide juste que l'image se construit)
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: false
-          cache-from: type=gha,scope=${{ matrix.cache_scope }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.cache_scope }}
+          cache-from: type=gha,scope=${{ matrix.name == 'web' && 'web-ci' || matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name == 'web' && 'web-ci' || matrix.name }}
