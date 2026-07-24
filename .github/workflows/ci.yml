@@ -120,11 +120,18 @@ jobs:
         working-directory: apps/api
         run: |
           cargo run &
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:3001/health && break
-            sleep 1
+          # Jusqu'à 5 min d'attente : un premier run sans cache Rust chaud
+          # (Swatinem/rust-cache) compile tout `apps/api` avant que le
+          # serveur ne réponde — les runs suivants seront bien plus rapides.
+          for i in $(seq 1 150); do
+            if curl -sf http://localhost:3001/health >/dev/null 2>&1; then
+              echo "API prête (tentative $i)"
+              exit 0
+            fi
+            sleep 2
           done
-          curl -sf http://localhost:3001/health
+          echo "::error::L'API n'a pas répondu sur /health après 5 minutes"
+          exit 1
       - name: Seed (crée l'admin utilisé par les tests de contrat)
         working-directory: apps/api
         run: cargo run --bin seed
