@@ -37,7 +37,7 @@ cargo test some_test_name        # by name, across lib+integration tests
 cargo clippy --all-targets --all-features -- -D warnings   # must be warning-free (also enforced in CI)
 cargo fmt                        # apply formatting; `cargo fmt --check` in CI
 npm run db:migrate -w @lukyss-bar/api   # sqlx migrate run
-npm run db:seed -w @lukyss-bar/api      # seeds an admin user (quentin.lkss@gmail.com / masterbarman) + demo data
+npm run db:seed -w @lukyss-bar/api      # seeds an admin user (quentin.lkss@gmail.com) + demo data — needs SEED_ADMIN_PASSWORD in env (never hardcoded, see apps/api/src/bin/seed.rs)
 npm run db:reset -w @lukyss-bar/api     # drop, create, migrate, seed
 npm run sdk -w @lukyss-bar/api          # cargo run --bin export_types — regenerate packages/api-types/generated
 ```
@@ -99,5 +99,6 @@ Each domain lives in its own module under `apps/api/src/`: `auth`, `ingredients`
 - `.github/workflows/cd.yml`: **api and web version and deploy independently**, never on a plain push to `main`. A `api-vX.Y.Z` tag only runs `build-and-push-api`/`deploy-api`; a `web-vX.Y.Z` tag only runs the web equivalents (gated by `startsWith(github.ref_name, 'api-v'|'web-v')`) — releasing one never touches the other's image or container. Each pushes `ghcr.io/q-lukyss/lukyss-bar-{api,web}` tagged `X.Y.Z`, `X.Y`, `latest`, then SSHes to the VPS, rewrites `IMAGE_TAG_API`/`IMAGE_TAG_WEB` directly in the server's `.env` (so a later manual `docker compose up -d` still uses the last deployed version, not `latest`), and runs `docker compose pull <service> && up -d <service>` for just that service.
 - Production reverse proxy is **Traefik**, run as a separate pre-existing stack on the VPS, outside this repo — `docker-compose.prod.yml` has no Traefik service, `api`/`web` just join its external docker network (`TRAEFIK_NETWORK` env var) and carry Traefik labels. Don't reintroduce Caddy or add a Traefik service to this compose file.
 - `NEXT_PUBLIC_API_URL` is inlined into the `web` image **at Docker build time** (`--build-arg` in `cd.yml`, from the `NEXT_PUBLIC_API_URL` repo variable) — changing it requires rebuilding/republishing the image, not just restarting the container.
+- There is no signup route (`POST /auth/login` only). The `api` image includes the `seed` binary (`apps/api/Dockerfile`) precisely so a first admin can be created in prod via `docker compose exec -e SEED_ADMIN_PASSWORD='...' api seed` — it is never run automatically (`CMD` stays `lukyss-bar-api`), and the password is deliberately read from env at runtime (`apps/api/src/bin/seed.rs`), never hardcoded, so prod can use a real password without touching code.
 
 See `README.md` ("Tests", "CI/CD", "Déploiement") and `TODO.md` for the full narrative and the one-time VPS/secrets setup checklist.

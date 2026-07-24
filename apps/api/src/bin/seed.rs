@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use anyhow::Context;
 use sqlx::postgres::PgPoolOptions;
 use ulid::Ulid;
 use uuid::Uuid;
@@ -150,8 +151,13 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     }
 
-    // 7) User admin
-    let hashed = bcrypt::hash("masterbarman", bcrypt::DEFAULT_COST)?;
+    // 7) User admin — le mot de passe vient de l'environnement (jamais en
+    // dur dans le code), pour pouvoir seeder un vrai admin en prod avec un
+    // mot de passe différent de celui utilisé en dev/CI :
+    // `docker compose exec -e SEED_ADMIN_PASSWORD='...' api seed`.
+    let admin_password = std::env::var("SEED_ADMIN_PASSWORD")
+        .context("SEED_ADMIN_PASSWORD est manquant dans l'environnement")?;
+    let hashed = bcrypt::hash(&admin_password, bcrypt::DEFAULT_COST)?;
     sqlx::query!(
         "INSERT INTO users (id, name, email, password, is_active, is_admin) VALUES ($1, $2, $3, $4, true, true)",
         Ulid::new().to_string(),

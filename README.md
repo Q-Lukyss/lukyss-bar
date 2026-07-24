@@ -145,6 +145,16 @@ Secrets/variables GitHub requis (Settings → Secrets and variables → Actions)
 - `web` — image `apps/web/Dockerfile` (Next.js en mode `standalone`, buildée avec `turbo prune` pour un contexte Docker minimal). **`NEXT_PUBLIC_API_URL` est inlinée au build**, via `--build-arg` côté CD — la changer nécessite de republier une image, pas juste de redémarrer le conteneur.
 - `postgres-backup` — dump quotidien + rotation (7j/4sem/6mois) via [`prodrigestivill/postgres-backup-local`](https://github.com/prodrigestivill/docker-postgres-backup-local), zéro code à écrire.
 
+### Premier admin en prod
+
+Il n'existe pas de route d'inscription (`POST /auth/login` uniquement) et Postgres n'a pas de port publié sur le VPS : le seul moyen de créer un compte est de lancer le binaire `seed` (inclus dans l'image `api`, mais **jamais exécuté automatiquement** — `CMD` reste `lukyss-bar-api`) directement sur le serveur :
+
+```bash
+docker compose -f docker-compose.prod.yml exec -e SEED_ADMIN_PASSWORD='un-vrai-mot-de-passe' api seed
+```
+
+Le mot de passe n'est jamais en dur dans le code (`apps/api/src/bin/seed.rs` lit `SEED_ADMIN_PASSWORD` depuis l'environnement et échoue explicitement si absent) : `-e` ne l'injecte que pour cette exécution ponctuelle, il ne reste pas dans le `.env` ni dans un conteneur qui tourne en continu. **Seed recrée aussi les données de démo** (cocktails, ingrédients, commandes d'exemple) à chaque exécution — à ne lancer qu'une fois, ou à adapter si tu ne veux pas de données factices en prod.
+
 ### Reverse proxy (Traefik)
 
 Le routage HTTPS est délégué à une stack **Traefik existante sur le VPS, en dehors de ce projet** (pas de service Traefik dans `docker-compose.prod.yml`). `api` et `web` rejoignent le réseau docker externe de cette stack (`traefik-public` par défaut) en plus de leur réseau interne, et portent des labels Traefik plutôt qu'un fichier de config dédié :

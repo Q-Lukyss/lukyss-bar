@@ -2,6 +2,10 @@ DATABASE_URL=postgres://lukyss:lukyssbar@localhost:5432/lukyssbar
 JWT_SECRET=dev-secret
 FRONTEND_URL=http://localhost:3000
 PORT=3001
+# Mot de passe de l'admin créé par `npm run db:seed` — jamais en dur dans le
+# code (voir apps/api/src/bin/seed.rs), pour pouvoir en prod seeder un vrai
+# admin avec un mot de passe différent, sans toucher au code.
+SEED_ADMIN_PASSWORD=masterbarman
 # Cloudflare R2
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=

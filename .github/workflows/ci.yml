@@ -100,6 +100,8 @@ jobs:
       FRONTEND_URL: http://localhost:3000
       PORT: "3001"
       API_URL: http://localhost:3001
+      # Doit matcher le mot de passe attendu par packages/api-contract-tests/src/setup.ts
+      SEED_ADMIN_PASSWORD: masterbarman
       R2_ACCOUNT_ID: ci
       R2_ACCESS_KEY_ID: ci
       R2_SECRET_ACCESS_KEY: ci

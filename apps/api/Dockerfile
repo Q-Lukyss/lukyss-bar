@@ -22,7 +22,7 @@ COPY --from=planner /app/recipe.json recipe.json
 ENV SQLX_OFFLINE=true
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
-RUN cargo build --release --bin lukyss-bar-api
+RUN cargo build --release --bin lukyss-bar-api --bin seed
 
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -31,6 +31,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && useradd --system --create-home --uid 1000 appuser
 WORKDIR /app
 COPY --from=builder /app/target/release/lukyss-bar-api /usr/local/bin/lukyss-bar-api
+# `seed` n'est pas lancé au démarrage du conteneur (CMD reste lukyss-bar-api)
+# — présent pour un usage ponctuel en prod : voir README "Premier admin en
+# prod" (`docker compose exec -e SEED_ADMIN_PASSWORD=... api seed`).
+COPY --from=builder /app/target/release/seed /usr/local/bin/seed
 USER appuser
 EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
