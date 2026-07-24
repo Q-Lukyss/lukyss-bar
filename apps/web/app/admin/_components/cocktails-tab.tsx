@@ -73,7 +73,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="font-playfair text-sm text-stone-500">
+        <p className="font-playfair text-sm text-muted-foreground">
           {loading
             ? "Chargement…"
             : `${cocktailsList.length} cocktail${cocktailsList.length > 1 ? "s" : ""}`}
@@ -84,7 +84,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
               setShowCreate(true);
               setEditId(null);
             }}
-            className="rounded-lg border border-amber-800/40 px-4 py-1.5 font-playfair text-sm text-amber-400 transition-colors hover:border-amber-600"
+            className="rounded-lg border border-primary/70 px-4 py-1.5 font-playfair text-sm text-primary transition-colors hover:border-primary"
           >
             + Nouveau
           </button>
@@ -92,7 +92,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-800/50 bg-red-950/40 p-4 font-playfair text-sm text-red-300">
+        <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-4 font-playfair text-sm text-destructive">
           {error}
         </div>
       )}
@@ -110,7 +110,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
           editId === c.id ? (
             <div
               key={c.id}
-              className="flex flex-col gap-0 rounded-xl border border-amber-600/40 bg-stone-900"
+              className="flex flex-col gap-0 rounded-xl border border-primary/70 bg-card"
             >
               <div className="p-5">
                 <CocktailForm
@@ -129,7 +129,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
           ) : (
             <div
               key={c.id}
-              className="flex items-center gap-4 rounded-xl border border-amber-800/30 bg-stone-900 p-5 transition-colors hover:border-amber-800/50"
+              className="flex items-center gap-4 rounded-xl border border-primary/60 bg-card p-5 transition-colors hover:border-primary/75"
             >
               {c.image && (
                 <Image
@@ -141,14 +141,14 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
                 />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate font-cinzel font-bold text-amber-400">
+                <p className="truncate font-cinzel font-bold text-primary">
                   {c.name}
                 </p>
-                <p className="font-playfair text-sm text-stone-500">
+                <p className="font-playfair text-sm text-muted-foreground">
                   {c.price.toFixed(2)} €
                 </p>
                 {c.description && (
-                  <p className="mt-0.5 truncate font-playfair text-xs italic text-stone-600">
+                  <p className="mt-0.5 truncate font-playfair text-xs italic text-muted-foreground">
                     {c.description}
                   </p>
                 )}
@@ -158,7 +158,7 @@ export function CocktailsTab({ jwt }: { jwt: string }) {
                   setEditId(c.id);
                   setShowCreate(false);
                 }}
-                className="font-playfair text-xs text-stone-500 transition-colors hover:text-amber-400"
+                className="font-playfair text-xs text-muted-foreground transition-colors hover:text-primary"
               >
                 Modifier
               </button>

@@ -105,18 +105,18 @@ export function CocktailIngredientManager({
   );
 
   const inputClass =
-    "rounded-lg bg-stone-800 px-3 py-2 font-playfair text-sm text-stone-100 outline-none transition-colors focus:ring-1 focus:ring-amber-600";
+    "rounded-lg bg-secondary px-3 py-2 font-playfair text-sm text-foreground outline-none transition-colors focus:ring-1 focus:ring-primary";
 
   return (
-    <div className="mt-4 flex flex-col gap-3 border-t border-stone-800 pt-4">
+    <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-cinzel text-xs font-semibold uppercase tracking-wider text-stone-500">
+        <h4 className="font-cinzel text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Ingrédients ({links.length})
         </h4>
         {!showAddForm && available.length > 0 && (
           <button
             onClick={() => setShowAddForm(true)}
-            className="font-playfair text-xs text-amber-400 transition-colors hover:text-amber-300"
+            className="font-playfair text-xs text-primary transition-all hover:brightness-110"
           >
             + Ajouter
           </button>
@@ -124,11 +124,11 @@ export function CocktailIngredientManager({
       </div>
 
       {error && (
-        <p className="font-playfair text-xs text-red-400">{error}</p>
+        <p className="font-playfair text-xs text-destructive">{error}</p>
       )}
 
       {showAddForm && (
-        <div className="flex flex-col gap-2 rounded-lg border border-stone-700 bg-stone-800/50 p-3">
+        <div className="flex flex-col gap-2 rounded-lg border border-border bg-secondary/50 p-3">
           <select
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
@@ -167,13 +167,13 @@ export function CocktailIngredientManager({
             <button
               onClick={handleAdd}
               disabled={adding || !selectedId || !quantity || !unity}
-              className="flex-1 rounded-lg bg-amber-600 py-1.5 font-playfair text-sm text-stone-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary py-1.5 font-playfair text-sm text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
             >
               {adding ? "Ajout…" : "Confirmer"}
             </button>
             <button
               onClick={() => setShowAddForm(false)}
-              className="rounded-lg border border-stone-700 px-3 py-1.5 font-playfair text-sm text-stone-400 transition-colors hover:text-stone-200"
+              className="rounded-lg border border-border px-3 py-1.5 font-playfair text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Annuler
             </button>
@@ -182,9 +182,9 @@ export function CocktailIngredientManager({
       )}
 
       {loading ? (
-        <p className="font-playfair text-xs text-stone-500">Chargement…</p>
+        <p className="font-playfair text-xs text-muted-foreground">Chargement…</p>
       ) : links.length === 0 ? (
-        <p className="font-playfair text-xs text-stone-600 italic">
+        <p className="font-playfair text-xs text-muted-foreground italic">
           Aucun ingrédient ajouté.
         </p>
       ) : (
@@ -192,21 +192,21 @@ export function CocktailIngredientManager({
           {links.map((link) => (
             <li
               key={link.id}
-              className="flex items-center justify-between rounded-lg bg-stone-800/50 px-3 py-2"
+              className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-2"
             >
               <span className="font-playfair text-sm">
                 <span
-                  className={link.stock ? "text-stone-300" : "text-red-400 line-through"}
+                  className={link.stock ? "text-foreground" : "text-destructive line-through"}
                 >
                   {link.name}
                 </span>
-                <span className="ml-2 text-stone-500">
+                <span className="ml-2 text-muted-foreground">
                   {link.quantity} {link.unity}
                 </span>
               </span>
               <button
                 onClick={() => handleDelete(link.id)}
-                className="ml-4 font-mono text-stone-600 transition-colors hover:text-red-400"
+                className="ml-4 font-mono text-muted-foreground transition-colors hover:text-destructive"
                 title="Supprimer"
               >
                 ×

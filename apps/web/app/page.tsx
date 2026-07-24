@@ -34,13 +34,13 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950">
+    <main className="min-h-screen bg-background">
       <Nav />
       <HeroSection />
 
       {error && (
         <div className="px-6 py-4">
-          <div className="mx-auto max-w-4xl rounded-xl border border-red-800/50 bg-red-950/40 p-6 font-playfair text-red-300">
+          <div className="mx-auto max-w-4xl rounded-xl border border-destructive/50 bg-destructive/10 p-6 font-playfair text-destructive">
             {error}
           </div>
         </div>

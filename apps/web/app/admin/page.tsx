@@ -8,6 +8,7 @@ import { CommandesTab } from "./_components/commandes-tab";
 import { CocktailsTab } from "./_components/cocktails-tab";
 import { IngredientsTab } from "./_components/ingredients-tab";
 import { CodesTab } from "./_components/codes-tab";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type Tab = "commandes" | "cocktails" | "ingredients" | "codes";
 
@@ -48,20 +49,23 @@ export default function AdminPage() {
 
   if (!jwt) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-stone-950 px-6">
+      <main className="flex min-h-screen items-center justify-center bg-background px-6">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center justify-between">
-            <h1 className="font-monoton text-3xl text-amber-500">Admin</h1>
-            <Link
-              href="/"
-              className="font-playfair text-sm text-stone-500 transition-colors hover:text-amber-400"
-            >
-              ← Accueil
-            </Link>
+            <h1 className="font-monoton text-3xl text-primary">Admin</h1>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/"
+                className="font-playfair text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                ← Accueil
+              </Link>
+              <ThemeToggle />
+            </div>
           </div>
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label className="font-playfair text-sm text-stone-400">Email</label>
+              <label className="font-playfair text-sm text-muted-foreground">Email</label>
               <input
                 type="email"
                 value={email}
@@ -69,27 +73,27 @@ export default function AdminPage() {
                 required
                 autoComplete="email"
                 placeholder="admin@lukyss.bar"
-                className="rounded-lg bg-stone-800 px-4 py-2.5 font-playfair text-stone-100 outline-none focus:ring-1 focus:ring-amber-600"
+                className="rounded-lg bg-secondary px-4 py-2.5 font-playfair text-foreground outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="font-playfair text-sm text-stone-400">Mot de passe</label>
+              <label className="font-playfair text-sm text-muted-foreground">Mot de passe</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="rounded-lg bg-stone-800 px-4 py-2.5 font-playfair text-stone-100 outline-none focus:ring-1 focus:ring-amber-600"
+                className="rounded-lg bg-secondary px-4 py-2.5 font-playfair text-foreground outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             {loginError && (
-              <p className="font-playfair text-sm text-red-400">{loginError}</p>
+              <p className="font-playfair text-sm text-destructive">{loginError}</p>
             )}
             <button
               type="submit"
               disabled={loginLoading}
-              className="mt-2 w-full rounded-xl bg-amber-600 py-3 font-cinzel font-bold text-stone-950 transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-2 w-full rounded-xl bg-primary py-3 font-cinzel font-bold text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loginLoading ? "Connexion..." : "Se connecter"}
             </button>
@@ -100,36 +104,37 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 px-6 py-12">
+    <main className="min-h-screen bg-background px-6 py-12">
       <div className="mx-auto max-w-3xl flex flex-col gap-8">
         <div className="flex items-center justify-between">
-          <h1 className="font-monoton text-3xl text-amber-500">Admin</h1>
+          <h1 className="font-monoton text-3xl text-primary">Admin</h1>
           <div className="flex items-center gap-4">
-            <span className="font-playfair text-sm text-stone-400">{userName}</span>
+            <span className="font-playfair text-sm text-muted-foreground">{userName}</span>
             <Link
               href="/"
-              className="font-playfair text-xs text-stone-500 transition-colors hover:text-amber-400"
+              className="font-playfair text-xs text-muted-foreground transition-colors hover:text-primary"
             >
               Accueil
             </Link>
             <button
               onClick={() => { setJwt(null); setEmail(""); setPassword(""); }}
-              className="font-playfair text-xs text-stone-600 transition-colors hover:text-red-400"
+              className="font-playfair text-xs text-muted-foreground transition-colors hover:text-destructive"
             >
               Déconnexion
             </button>
+            <ThemeToggle />
           </div>
         </div>
 
-        <div className="flex border-b border-stone-800">
+        <div className="flex border-b border-border">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2.5 font-cinzel text-xs font-semibold uppercase tracking-wider transition-colors ${
                 activeTab === tab.id
-                  ? "border-b-2 border-amber-500 text-amber-400"
-                  : "text-stone-500 hover:text-stone-300"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {tab.label}

@@ -58,8 +58,8 @@ export function CodesTab({ jwt }: { jwt: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-xl border border-amber-800/30 bg-stone-900 p-5 flex flex-col gap-3">
-        <h3 className="font-cinzel text-xs font-semibold uppercase tracking-wider text-stone-500">
+      <div className="rounded-xl border border-primary/60 bg-card p-5 flex flex-col gap-3">
+        <h3 className="font-cinzel text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Nouveau code promo
         </h3>
         <form onSubmit={handleCreate} className="flex gap-3">
@@ -67,12 +67,12 @@ export function CodesTab({ jwt }: { jwt: string }) {
             value={newCode}
             onChange={(e) => setNewCode(e.target.value.toUpperCase())}
             placeholder="Code (laisser vide pour auto-générer)"
-            className="flex-1 rounded-lg bg-stone-800 px-4 py-2.5 font-playfair uppercase tracking-widest text-stone-100 outline-none focus:ring-1 focus:ring-amber-600"
+            className="flex-1 rounded-lg bg-secondary px-4 py-2.5 font-playfair uppercase tracking-widest text-foreground outline-none focus:ring-1 focus:ring-primary"
           />
           <button
             type="submit"
             disabled={creating}
-            className="rounded-xl bg-amber-600 px-5 py-2.5 font-cinzel font-bold text-stone-950 transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-primary px-5 py-2.5 font-cinzel font-bold text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {creating ? "..." : "Créer"}
           </button>
@@ -80,12 +80,12 @@ export function CodesTab({ jwt }: { jwt: string }) {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-800/50 bg-red-950/40 p-4 font-playfair text-sm text-red-300">
+        <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-4 font-playfair text-sm text-destructive">
           {error}
         </div>
       )}
 
-      <p className="font-playfair text-sm text-stone-500">
+      <p className="font-playfair text-sm text-muted-foreground">
         {loading ? "Chargement..." : `${codesList.length} code${codesList.length > 1 ? "s" : ""}`}
       </p>
 
@@ -93,22 +93,22 @@ export function CodesTab({ jwt }: { jwt: string }) {
         {codesList.map((c) => (
           <div
             key={c.id}
-            className="rounded-xl border border-amber-800/20 bg-stone-900 px-5 py-3 flex items-center justify-between gap-4"
+            className="rounded-xl border border-primary/45 bg-card px-5 py-3 flex items-center justify-between gap-4"
           >
-            <span className="font-mono text-sm font-bold tracking-widest text-amber-300">
+            <span className="font-mono text-sm font-bold tracking-widest text-primary">
               {c.code}
             </span>
             <button
               onClick={() => handleDelete(c.id)}
               disabled={deleting === c.id}
-              className="font-playfair text-xs text-stone-600 transition-colors hover:text-red-400 disabled:opacity-50"
+              className="font-playfair text-xs text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
             >
               {deleting === c.id ? "..." : "Supprimer"}
             </button>
           </div>
         ))}
         {codesList.length === 0 && !loading && (
-          <p className="font-playfair text-stone-600">Aucun code promo.</p>
+          <p className="font-playfair text-muted-foreground">Aucun code promo.</p>
         )}
       </div>
     </div>

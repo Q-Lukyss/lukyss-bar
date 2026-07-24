@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CartButton } from "@/components/cart-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Nav() {
   const [visible, setVisible] = useState(false);
@@ -15,21 +16,22 @@ export function Nav() {
 
   return (
     <nav
-      className={`fixed top-0 z-50 w-full border-b border-amber-800/20 bg-stone-950/90 px-6 py-3 backdrop-blur-sm transition-all duration-300 ${
+      className={`fixed top-0 z-50 w-full border-b border-primary/45 bg-background/90 px-6 py-3 backdrop-blur-sm transition-all duration-300 ${
         visible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
     >
       <div className="mx-auto flex max-w-4xl items-center justify-between">
-        <Link href="/" className="font-monoton text-sm text-amber-500">
+        <Link href="/" className="font-monoton text-sm text-brand">
           Lukyss&apos;Bar
         </Link>
         <div className="flex items-center gap-3">
           <Link
             href="/admin"
-            className="rounded-full border border-stone-700 px-4 py-1.5 font-playfair text-sm text-stone-400 transition-colors hover:border-stone-500 hover:text-stone-200"
+            className="rounded-full border border-border px-4 py-1.5 font-playfair text-sm text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
           >
             Connexion
           </Link>
+          <ThemeToggle />
           <CartButton />
         </div>
       </div>

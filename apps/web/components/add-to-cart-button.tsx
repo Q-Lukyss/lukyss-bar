@@ -22,10 +22,10 @@ export function AddToCartButton({ cocktailId, name, price }: Props) {
   return (
     <button
       onClick={handleClick}
-      className={`mt-auto w-full rounded-lg py-2 text-sm font-semibold transition-colors ${
+      className={`mt-auto w-full rounded-lg py-2 text-sm font-semibold transition-all ${
         added
-          ? "bg-green-700 text-green-100"
-          : "bg-amber-600 text-stone-950 hover:bg-amber-500 active:bg-amber-700"
+          ? "bg-success text-success-foreground"
+          : "bg-primary text-primary-foreground hover:brightness-110 active:brightness-95"
       }`}
     >
       {added ? "Ajouté ✓" : "Ajouter au panier"}

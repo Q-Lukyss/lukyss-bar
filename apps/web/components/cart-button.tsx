@@ -9,7 +9,7 @@ export function CartButton() {
   return (
     <Link
       href="/panier"
-      className="relative flex h-10 w-10 items-center justify-center rounded-full border border-amber-800/40 text-amber-400 transition-colors hover:border-amber-600 hover:bg-amber-600/10"
+      className="relative flex h-10 w-10 items-center justify-center rounded-full border border-primary/70 text-primary transition-colors hover:border-primary hover:bg-primary/10"
       aria-label="Voir le panier"
     >
       <svg
@@ -29,7 +29,7 @@ export function CartButton() {
       </svg>
 
       {count > 0 && (
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 font-mono text-xs font-bold text-stone-950">
+        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary font-mono text-xs font-bold text-primary-foreground">
           {count > 99 ? "99+" : count}
         </span>
       )}

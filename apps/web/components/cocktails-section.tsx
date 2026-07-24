@@ -69,11 +69,11 @@ export function CocktailsSection({
       <div className="mx-auto max-w-4xl">
         <div className="mb-10 flex flex-col gap-5">
           <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-amber-800/30" />
-            <h2 className="font-cinzel text-2xl font-bold text-amber-400">
+            <div className="h-px flex-1 bg-primary/60" />
+            <h2 className="font-cinzel text-2xl font-bold text-primary">
               La Carte
             </h2>
-            <div className="h-px flex-1 bg-amber-800/30" />
+            <div className="h-px flex-1 bg-primary/60" />
           </div>
 
           <input
@@ -81,7 +81,7 @@ export function CocktailsSection({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher un cocktail ou ingrédient…"
-            className="w-full rounded-xl border border-amber-800/30 bg-stone-900 px-4 py-2.5 font-playfair text-sm text-stone-200 placeholder-stone-500 outline-none transition-colors focus:border-amber-600/60"
+            className="w-full rounded-xl border border-primary/60 bg-card px-4 py-2.5 font-playfair text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/90"
           />
 
           <div className="flex flex-wrap gap-2">
@@ -91,8 +91,8 @@ export function CocktailsSection({
                 onClick={() => setActiveFilter(filter.value)}
                 className={`rounded-full px-4 py-1.5 font-playfair text-sm transition-all duration-200 ${
                   activeFilter === filter.value
-                    ? "bg-amber-600 font-semibold text-stone-950 scale-105"
-                    : "border border-amber-800/40 text-amber-400 hover:border-amber-600 hover:bg-amber-600/10"
+                    ? "bg-primary font-semibold text-primary-foreground scale-105"
+                    : "border border-primary/70 text-primary hover:border-primary hover:bg-primary/10"
                 }`}
               >
                 {filter.label}
@@ -100,13 +100,13 @@ export function CocktailsSection({
             ))}
           </div>
 
-          <p className="font-playfair text-sm text-stone-500">
+          <p className="font-playfair text-sm text-muted-foreground">
             {filtered.length} cocktail{filtered.length > 1 ? "s" : ""}
           </p>
         </div>
 
         {filtered.length === 0 ? (
-          <p className="font-playfair text-stone-400">Aucun cocktail trouvé.</p>
+          <p className="font-playfair text-muted-foreground">Aucun cocktail trouvé.</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((cocktail, index) => (
